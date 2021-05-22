@@ -37,3 +37,4 @@ Route::post('list-product2', function(Request $request) {
 });
 
 Route::post('/list-product/','ScraperController@getListProduct');
+Route::get('/test-product/','ScraperController@scrapProduct');

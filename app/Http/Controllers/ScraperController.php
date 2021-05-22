@@ -26,6 +26,13 @@ class ScraperController extends BaseController
     public function scrapProduct()
     {
         $scrapModel = new Scrap();
-        $scrapModel->scrapProduct();
+        return $scrapModel->scrapProduct();
+    }
+
+    // Hàm lưu thông tin phản hồi scrap của product từ server
+    public function saveProductRunning($result)
+    {
+        $scrapModel = new Scrap();
+        return $scrapModel->saveProductRunning($result);
     }
 }

@@ -3,9 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Console\Commands\BaseCommand as BaseCommand;
 use App\Http\Controllers\ScraperController;
 
-class CustomCommand extends Command
+class CustomCommand extends BaseCommand
 {
     /**
      * The name and signature of the console command.
@@ -49,7 +50,7 @@ class CustomCommand extends Command
             if (($minute % $minute_compare) == 0)
             {
                 $min = $minute_compare;
-                logfile_system('+++++++++++++++++++++++ Hàm đang chạy bởi '.$min." phut \n");
+                logfile_system("\n".'===================== Hàm đang chạy bởi '.$min." phut ======================= \n");
                 break;
             }
         }
@@ -86,8 +87,7 @@ class CustomCommand extends Command
 
     protected function run1Minute()
     {
-        $scraper_controller = new ScraperController(); // make sure to import the controller
-        $check0 = $scraper_controller->scrapProduct();
+        $check0 = $this->sendDataClawer();
     }
 
     protected function run4Minute()
@@ -113,5 +113,25 @@ class CustomCommand extends Command
     protected function run0Minute()
     {
 
+    }
+
+    /*Send data to server clawer*/
+    private function sendDataClawer()
+    {
+        $scraper_controller = new ScraperController(); // make sure to import the controller
+        $data = $scraper_controller->scrapProduct();
+        if ($data['return'] == 1)
+        {
+            $result = $this->goUrl($data);
+            $save_data = [
+                'result' => $result,
+                'data' => $data
+            ];
+            $return = $scraper_controller->saveProductRunning($save_data);
+        } else {
+            $return = 1;
+        }
+        logfile_system($data['message']);
+        return $return;
     }
 }
