@@ -12,7 +12,9 @@ class Scrap extends Model
         $return = false;
         $message = '';
         $headerContent = $request->header();
-        if (array_key_exists("vp6", $headerContent) && $headerContent['vp6'][0] == '12345')
+        $header_key = env('HEADER_VP6_KEY');
+        $header_value = env('HEADER_VP6_VALUE');
+        if (array_key_exists($header_key, $headerContent) && $headerContent[$header_key][0] == $header_value)
         {
             $bodyContent = $request->getContent();
             $lstProducts = json_decode($bodyContent, true);
@@ -31,6 +33,57 @@ class Scrap extends Model
                     $data[] = $tmp;
                 }
                 $result = \DB::table('list_products')->insert($data);
+                if ($result)
+                {
+                    $return = true;
+                    $message = 'Toàn bộ product đã được cập nhật thành công';
+                } else {
+                    $message = 'Xảy ra lỗi không thể lưu dữ liệu vào database';
+                }
+            }
+        } else {
+            $message = '[Warning] Phát hiện ra có người ngoài đang hack vào hệ thống. Bật chế độ bảo mật cao';
+        }
+        return array(
+            'result' => $return,
+            'message' => $message
+        );
+    }
+
+    // hàm nhận list images gửi về từ server
+    public function getListProductImages($request)
+    {
+        $return = false;
+        $message = '';
+        $headerContent = $request->header();
+        $header_key = env('HEADER_VP6_KEY');
+        $header_value = env('HEADER_VP6_VALUE');
+        if (array_key_exists($header_key, $headerContent) && $headerContent[$header_key][0] == $header_value)
+        {
+            $bodyContent = $request->getContent();
+            $lstProducts = json_decode($bodyContent, true);
+            print_r($lstProducts);
+            die();
+//            var_dump($lstProducts);
+//            die();
+//            print_r($lstProducts);
+//            logfile_system($lstProducts);
+            if (sizeof($lstProducts) > 0)
+            {
+                $result = true;
+//                $data = array();
+//                foreach ($lstProducts as $item)
+//                {
+//                    $tmp = [
+//                        'scrap_id' => 1,
+//                        'product_name' => trim($item['title']),
+//                        'product_link' => trim($item['link']),
+//                        'created_at' => dbTime(),
+//                        'updated_at' => dbTime()
+//                    ];
+//                    $data[] = $tmp;
+//                }
+//                $result = \DB::table('list_products')->insert($data);
                 if ($result)
                 {
                     $return = true;
@@ -85,7 +138,7 @@ class Scrap extends Model
                 ->where('status',env('STATUS_SCRAP_PRODUCT_NEW'))
                 ->orderBy('scrap_id', 'desc')
                 ->orderBy('created_at', 'desc')
-                ->limit(10)
+                ->limit(3)
                 ->get()->toArray();
             if (sizeof($lists) > 0)
             {
@@ -117,6 +170,7 @@ class Scrap extends Model
             } else {
                 $status = env('STATUS_SCRAP_PRODUCT_ERROR');
             }
+            $status = env('STATUS_SCRAP_PRODUCT_NEW');
             $list_id = array();
             // lấy toàn bộ id product data lưu vào 1 mảng
             if (is_array($result['data']) && sizeof($result['data']) > 0)

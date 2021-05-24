@@ -23,6 +23,21 @@ class ScraperController extends BaseController
         }
     }
 
+    public function getListProductImages(Request $request){
+        $scrapModel = new Scrap();
+        try {
+            $result = $scrapModel->getListProductImages($request);
+            if ($result['result'])
+            {
+                return $this->sendResponse([1], $result['message']);
+            } else {
+                return $this->sendError($result['message']);
+            }
+        } catch (\Exception $e) {
+            return $this->sendError( $e->getMessage(),'Xảy ra lỗi ngoài mong đợi');
+        }
+    }
+
     public function scrapProduct()
     {
         $scrapModel = new Scrap();
