@@ -15,4 +15,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/', function () {
+    return view('welcome');
+})->middleware('auth');
+
+Route::get('/home', 'HomeController@index')->name('home');
+
 Route::get('/test2', 'ScraperController@test');
+
+Auth::routes();
