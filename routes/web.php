@@ -19,8 +19,18 @@ Route::get('/', function () {
     return view('welcome');
 })->middleware('auth');
 
-Route::get('/home', 'HomeController@index')->name('home');
-
-Route::get('/test2', 'ScraperController@test');
-
 Auth::routes();
+
+Route::get('/home', 'UserController@index')->name('home');
+
+
+/*Only admin*/
+Route::prefix('admin')->group(function() {
+    Route::get('/login','AdminLoginController@showLoginForm')->name('admin.login');
+    Route::post('/login', 'AdminLoginController@login')->name('admin.login.submit');
+    Route::get('logout/', 'AdminLoginController@logout')->name('admin.logout');
+
+    Route::get('/', 'AdminController@index')->name('admin.dashboard');
+}) ;
+
+
