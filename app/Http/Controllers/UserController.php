@@ -17,4 +17,9 @@ class UserController extends Controller
         return view('user.dashbroad');
     }
 
+
+    public function viewScraper()
+    {
+        return view('user.dashbroad');
+    }
 }
