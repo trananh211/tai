@@ -25,15 +25,12 @@ Route::get('/home', 'UserController@index')->name('home');
 
 /*Only member*/
 Route::group(['middleware' => ['member']], function () {
-    Route::get('/view-scraper', 'UserController@viewScraper');
+    // verify data scrap
+    Route::get('/view-scraper', 'AdminController@viewScraper');
+    Route::post('/post-data-scrap-setup', 'AdminController@dataScrapSetup');
+    Route::post('/save-data-scrap-setup', 'AdminController@saveDataScrapSetup');
+    Route::get('/list-scraper', 'AdminController@getListScraper');
 });
 
-/*Route::prefix('admin')->group(function() {
-    Route::get('/login','AdminLoginController@showLoginForm')->name('admin.login');
-    Route::post('/login', 'AdminLoginController@login')->name('admin.login.submit');
-    Route::get('logout/', 'AdminLoginController@logout')->name('admin.logout');
-
-    Route::get('/', 'AdminController@index')->name('admin.dashboard');
-}) ;*/
 
 

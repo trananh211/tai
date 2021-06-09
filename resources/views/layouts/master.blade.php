@@ -36,6 +36,7 @@
 
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
+        @include('layouts.alert')
         @yield('content')
     </div>
     <!-- /.content-wrapper -->

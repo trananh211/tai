@@ -1,0 +1,219 @@
+@extends('layouts.master')
+
+<?php $page_title = 'Scraper Setup'; ?>
+@section('title',$page_title)
+
+@section('content')
+    <?php
+    if (Session::has('get_scrap')) {
+        $ss_scrap = Session('get_scrap');
+    } else {
+        $ss_scrap = false;
+    }
+    ?>
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">{{ $page_title }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">{{ $page_title }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Main row -->
+            <div class="row">
+
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">SETUP Basic</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        <form action="{{ url('post-data-scrap-setup') }}" method="post" >
+                            {{ csrf_field() }}
+                            <div class="card-body">
+                                <div class="row">
+                                    {{--<div class="col-sm-6">
+                                        <!-- select -->
+                                        <div class="form-group">
+                                            <label>Select Platform (Bắt Buộc)</label>
+                                            <select name="platform_id" class="form-control" required>
+                                                <option >Chọn Shop</option>
+                                                @foreach( $platforms as $platform_id => $platform_name)
+                                                    <option value="{{ $platform_id }}">{{ $platform_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>--}}
+                                    <div class="col-sm-6">
+                                        <!-- select -->
+                                        <div class="form-group">
+                                            <label>Select Template (Bắt Buộc)</label>
+                                            <select name="template_id" class="form-control" required>
+                                                <option value="0">Chọn Template</option>
+                                                @foreach( $templates as $template_id => $template_name)
+                                                    <option {{ ($ss_scrap && $template_id == $ss_scrap['template_id']) ? 'selected' : ''}}
+                                                            value="{{ $template_id }}"> {{ $template_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <!-- select -->
+                                        <div class="form-group">
+                                            <label>Kiểu tải trang</label>
+                                            <select name="type_page_load" class="form-control" required>
+                                                <option value="0">Chọn kiểu</option>
+                                                @foreach( $typePageLoad as $typePageLoad_id => $typePageLoad_name)
+                                                    <option {{ ($ss_scrap && $typePageLoad_id == $ss_scrap['type_page_load']) ? 'selected' : ''}}
+                                                        value="{{ $typePageLoad_id }}">{{ $typePageLoad_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3" title="Xoá đoạn text của title gốc">
+                                        <label>Bỏ text trong title</label>
+                                        <input value="{{ ($ss_scrap) ? $ss_scrap['exclude_text'] : ''}}"
+                                               type="text" class="form-control" name="exclude_text" placeholder="VD: HYA102" >
+                                    </div>
+                                    <div class="col-sm-3"  title="Chọn ảnh theo thứ tự hiển thị ở trang product gốc">
+                                        <label>Chọn Ảnh</label>
+                                        <input value="{{ ($ss_scrap) ? $ss_scrap['image_array'] : ''}}"
+                                               type="text" class="form-control" name="image_array" placeholder="VD: 1,2,3,5">
+                                    </div>
+                                    <div class="col-sm-3" title="Bỏ ảnh nếu thứ tự ảnh không giống nhau">
+                                        <label>Loại ảnh</label>
+                                        <input value="{{ ($ss_scrap) ? $ss_scrap['exclude_image'] : ''}}"
+                                               type="text" class="form-control" name="exclude_image" placeholder="VD: link1, link2" >
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label>Dữ liệu ngoài Category</label>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="card card-outline card-info">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">
+                                                            Dữ liệu khai báo
+                                                        </h3>
+                                                    </div>
+                                                    <!-- /.card-header -->
+                                                    <div class="card-body">
+                                                    <textarea name="catalog_source" rows="15" cols="200" style="width:100%;">
+                                                        {{ ($ss_scrap) ? $ss_scrap['catalog_source'] : ''}}
+                                                    </textarea>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        Khai báo đầy đủ thông tin như bên cạnh ====>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card card-outline card-info">
+                                                    <div class="card-header bg-info color-palette">
+                                                        <h3 class="card-title">
+                                                            Dữ liệu mẫu
+                                                        </h3>
+                                                    </div>
+                                                    <!-- /.card-header -->
+                                                    <div class="card-body">
+                                                    <textarea rows="15" cols="200" disabled style="width:100%;">
+                                                        {{ $data_template }}
+                                                    </textarea>
+                                                    </div>
+                                                    <div class="card-footer bg-info color-palette">
+                                                        Dữ liệu mẫu để khai báo. Chỉ copy không thể xoá được
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- /.col-->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Dữ liệu Trang Sản Phẩm</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card card-outline card-info">
+                                                <div class="card-header bg-navy color-palette">
+                                                    <h3 class="card-title">
+                                                        Dữ liệu khai báo
+                                                    </h3>
+                                                </div>
+                                                <!-- /.card-header -->
+                                                <div class="card-body">
+                                                    <textarea name="product_source" rows="10" cols="200" style="width:100%;">
+                                                        {{ ($ss_scrap) ? $ss_scrap['product_source'] : ''}}
+                                                    </textarea>
+                                                </div>
+                                                <div class="card-footer bg-navy color-palette">
+                                                    Khai báo đầy đủ thông tin như bên cạnh ====>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card card-outline card-info">
+                                                <div class="card-header bg-olive color-palette">
+                                                    <h3 class="card-title">
+                                                        Dữ liệu mẫu
+                                                    </h3>
+                                                </div>
+                                                <!-- /.card-header -->
+                                                <div class="card-body">
+                                                    <textarea rows="10" cols="200" disabled style="width:100%;">
+                                                        {{ $product_template }}
+                                                    </textarea>
+                                                </div>
+                                                <div class="card-footer bg-olive color-palette">
+                                                    Dữ liệu mẫu để khai báo. Chỉ copy không thể xoá được
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.col-->
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- /.card-body -->
+
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- /.card -->
+                </div>
+
+
+            </div>
+            <!-- /.row (main row) -->
+        </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+@endsection
+
+@section('script')
+    @include('script.user.main')
+@endsection
+

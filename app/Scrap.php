@@ -6,7 +6,36 @@ use Illuminate\Database\Eloquent\Model;
 
 class Scrap extends Model
 {
-    //
+    //verify data scrap . Call API to server Node JS
+    public function verifyDataScrapBeforeSave($body)
+    {
+        $header = [
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'User-Agent' => 'testing/1.0',
+            env('HEADER_VP6_KEY') => env('HEADER_VP6_VALUE')
+        ];
+        $url = env('URL_SERVER_VERIFY_DATA_SCRAP');
+        $result = json_decode(postUrl($url, $header, $body), true);
+        if (is_array($result) && array_key_exists('result', $result) && $result['result'] == 1)
+        {
+            $return = [
+                'return' => 1,
+                'alert' => 'success',
+                'message' => $result['message'],
+                'data' => $result['data']
+            ];
+        } else {
+            $return = [
+                'return' => 0,
+                'alert' => 'error',
+                'message' => $result['message']
+            ];
+        }
+        return $return;
+    }
+
+
     public function getListProduct($request)
     {
         $return = false;

@@ -87,7 +87,8 @@ class CustomCommand extends BaseCommand
 
     protected function run1Minute()
     {
-        $check0 = $this->sendDataClawer();
+//        $check0 = $this->sendDataClawer();
+        $check0 = $this->test1();
     }
 
     protected function run4Minute()
@@ -133,5 +134,12 @@ class CustomCommand extends BaseCommand
         }
         logfile_system($data['message']);
         return $return;
+    }
+
+    private function test1()
+    {
+        $scraper_controller = new ScraperController();
+        $check = $scraper_controller->testPost();
+        print_r($check);
     }
 }

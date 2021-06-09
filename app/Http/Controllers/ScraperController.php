@@ -8,6 +8,7 @@ use App\Scrap;
 
 class ScraperController extends BaseController
 {
+    /* API */
     public function getListProduct(Request $request){
         $scrapModel = new Scrap();
         try {
@@ -50,4 +51,5 @@ class ScraperController extends BaseController
         $scrapModel = new Scrap();
         return $scrapModel->saveProductRunning($result);
     }
+    /*END API*/
 }
