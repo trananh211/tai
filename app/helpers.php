@@ -18,12 +18,13 @@
 
     function logfile($str){
         echo $str."\n";
-        Log::channel('custom')->info($str);
+        \Log::channel('custom')->info($str);
     }
 
     function logfile_system($str){
-        echo $str."\n";
-        Log::channel('custom')->info($str);
+//        echo $str."\n";
+        $str .= "\n";
+        \Log::channel('custom')->info($str);
     }
 
     function dbTime()
@@ -55,24 +56,24 @@
         $data_template = '
             {
                 "url": "https://vetz3d.com/shop?startId=6036571b4dd66d935ec5e512", // Địa chỉ website cần crawl
-                "waitSelector": "div.ShopPage", // Chỉ xuất hiện khi trang load xong ( Có thể có hoặc không )
-                "productItem": "div.ShopPage div.ProductItem",
-                "productTitle": "div.BottomProduct > div.Title",
-                "productLink": "a",
-                "https_origin": "https://vetz3d.com",
-                "btnNext": "button.ml-2",
-                "signalParentButton": ".ShopPagination .d-inline-flex button",
-                "signalAttribute": "class",
-                "signalClassLastButton": "buttonDisabled",
-                "url_end" : "https://vetz3d.com/shop?startId=60350adbbf2d6309e9d90385"
+                "waitSelector": "div.ShopPage", // Dấu hiệu nhận biết khi trang load xong ( Có thể có hoặc không )
+                "productItem": "div.ShopPage div.ProductItem", // Thuộc tính cha của product và có lặp lại với mỗi sản phẩm
+                "productTitle": "div.BottomProduct > div.Title", // Dấu hiệu nhận biết title của sản phẩm
+                "productLink": "a", // Dấu hiệu nhận biết thẻ Link của sản phẩm. Thường là "<a>", "<span>", "<div>"  
+                "https_origin": "https://vetz3d.com", // Để trống hoặc chỉ điền khi link sản phẩm thiếu phần đầu website
+                "btnNext": "button.ml-2", // Dấu hiệu nhận biết Nút bấm next trang (Để trống nếu kiểu là cuộn trang)
+                "signalParentButton": ".ShopPagination .d-inline-flex button", // Thuộc tính cha của nút bấm next trang (Để trống nếu kiểu là cuộn trang)
+                "signalAttribute": "class", //Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
+                "signalClassLastButton": "buttonDisabled", //Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
+                "url_end" : "https://vetz3d.com/shop?startId=60350adbbf2d6309e9d90385" // Last Page để kiểm tra nút bấm cuối cùng (Để trống nếu kiểu là cuộn trang)
             }
         ';
 
         $product_template = '
             {
-                "productTitle": ".ProductMain .ProductTitle h1",
-                "imageSelector": "#main-preview .ProductImage img.img-fluid",
-                "imageAttribute" : "src"
+                "productTitle": ".ProductMain .ProductTitle h1", // Title của trang sản phẩm
+                "imageSelector": "#main-preview .ProductImage img.img-fluid", // Dấu hiệu nhận biết list Ảnh của trang sản phẩm
+                "imageAttribute" : "src" // Thuộc tính của ảnh. có thể là src, href, span, title
             }
         ';
 
@@ -84,6 +85,46 @@
             'product_template' => $product_template,
         ];
         return $results;
+    }
+
+    // hiển thị ra trạng thái của website
+    function getStatus($status)
+    {
+        $class = '';
+        $view = '';
+        switch ($status) {
+            case env('STATUS_SCRAP_PRODUCT_NEW'):
+                $class = 'bg-primary';
+                $view = "New";
+                break;
+            case env('STATUS_SCRAP_PRODUCT_ERROR'):
+                $class = 'bg-error';
+                $view = "Error";
+                break;
+            case env('STATUS_SCRAP_PRODUCT_RUNNING'):
+                $class = 'bg-warning';
+                $view = "Running";
+                break;
+            case env('STATUS_SCRAP_PRODUCT_SUCCESS'):
+                $class = 'bg-success';
+                $view = "Success";
+                break;
+        }
+        echo '<div class="color-palette-set">
+                  <div class="'.$class.' text-center color-palette"><span>'.$view.'</span></div>
+                </div>';
+    }
+
+    /* API SCRAP DATA*/
+    function getHeader()
+    {
+        $header = [
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'User-Agent' => 'testing/1.0',
+            env('HEADER_VP6_KEY') => env('HEADER_VP6_VALUE')
+        ];
+        return $header;
     }
 
     function postUrl($url, $header, $body)
@@ -113,7 +154,7 @@
         return $result;
     }
 
-    /* SCRAP DATA*/
+
     function verifyDataScrap($data)
     {
         $url = env('URL_SERVER_POST_DATA_SCRAP');
@@ -127,6 +168,6 @@
         $result = json_decode(postUrl($url, $header, $body), true);
         return $result;
     }
-    /* END SCRAP DATA*/
+    /* END API SCRAP DATA*/
 
 

@@ -56,9 +56,7 @@ class AdminController extends Controller
             $result = $scrapModel->verifyDataScrapBeforeSave($data_return['verify_data']);
             if (is_array($result) && array_key_exists('return', $result) && $result['return'] == 1)
             {
-//                $return = $adminModel->saveDataScrap($data);
                 $lst_product = (array_key_exists('data', $result))? $result['data'] : null;
-//                $lst_product = json_decode($lst_product, true);
                 $alert = $result['alert'];
                 $message = $result['message'];
                 $back = false;
@@ -77,7 +75,8 @@ class AdminController extends Controller
             $templates = $data['templates'];
 
             \Session::flash($alert,$message);
-            return view('user.last_verify_scrap', compact('lst_product', 'platforms', 'typePageLoad', 'templates'));
+            return view('user.last_verify_scrap',
+                compact('lst_product', 'platforms', 'typePageLoad', 'templates'));
         }
 
     }
@@ -97,6 +96,10 @@ class AdminController extends Controller
 
     // list thông tin các danh sách website scraper
     public function getListScraper() {
-        echo "aaaaa";
+        $lists = \DB::table('web_scraps')
+            ->select('id', 'url', 'template_id', 'status')
+            ->orderBy('template_id')
+            ->get()->toArray();
+        return view('user.list_scraper')->with(compact('lists'));
     }
 }

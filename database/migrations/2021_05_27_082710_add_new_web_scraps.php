@@ -21,6 +21,7 @@ class AddNewWebScraps extends Migration
             $table->text('exclude_image')->nullable(true);
             $table->string('first_title')->nullable(true);
             $table->text('url')->nullable(false);
+            $table->tinyInteger('status')->default(0);
             $table->text('catalog_source')->nullable(false);
             $table->text('product_source')->nullable(false);
             $table->timestamps();

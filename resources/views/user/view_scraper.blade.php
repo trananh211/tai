@@ -1,6 +1,13 @@
 @extends('layouts.master')
 
-<?php $page_title = 'Scraper Setup'; ?>
+<?php
+$page_title = 'Scraper Setup : Verify Product Page';
+$page_link = url('view-scraper');
+$breadcrumb = [
+    'page_title' => $page_title,
+    'page_link' => $page_link
+];
+?>
 @section('title',$page_title)
 
 @section('content')
@@ -12,21 +19,7 @@
     }
     ?>
     <!-- Content Header (Page header) -->
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">{{ $page_title }}</h1>
-                </div><!-- /.col -->
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">{{ $page_title }}</li>
-                    </ol>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
-    </div>
+    @include('layouts.breadcrumb', $breadcrumb)
     <!-- /.content-header -->
 
     <!-- Main content -->
@@ -47,18 +40,6 @@
                             {{ csrf_field() }}
                             <div class="card-body">
                                 <div class="row">
-                                    {{--<div class="col-sm-6">
-                                        <!-- select -->
-                                        <div class="form-group">
-                                            <label>Select Platform (Bắt Buộc)</label>
-                                            <select name="platform_id" class="form-control" required>
-                                                <option >Chọn Shop</option>
-                                                @foreach( $platforms as $platform_id => $platform_name)
-                                                    <option value="{{ $platform_id }}">{{ $platform_name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>--}}
                                     <div class="col-sm-6">
                                         <!-- select -->
                                         <div class="form-group">
@@ -110,7 +91,7 @@
                                     <div class="form-group">
                                         <label>Dữ liệu ngoài Category</label>
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-5">
                                                 <div class="card card-outline card-info">
                                                     <div class="card-header">
                                                         <h3 class="card-title">
@@ -119,7 +100,7 @@
                                                     </div>
                                                     <!-- /.card-header -->
                                                     <div class="card-body">
-                                                    <textarea name="catalog_source" rows="15" cols="200" style="width:100%;">
+                                                    <textarea name="catalog_source" rows="16" cols="200" style="width:100%; font-size: 14px;">
                                                         {{ ($ss_scrap) ? $ss_scrap['catalog_source'] : ''}}
                                                     </textarea>
                                                     </div>
@@ -128,7 +109,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-7">
                                                 <div class="card card-outline card-info">
                                                     <div class="card-header bg-info color-palette">
                                                         <h3 class="card-title">
@@ -137,7 +118,7 @@
                                                     </div>
                                                     <!-- /.card-header -->
                                                     <div class="card-body">
-                                                    <textarea rows="15" cols="200" disabled style="width:100%;">
+                                                    <textarea rows="16" cols="200" disabled style="width:100%; font-size: 14px;">
                                                         {{ $data_template }}
                                                     </textarea>
                                                     </div>

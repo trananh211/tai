@@ -17,25 +17,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('test', function(Request $request) {
-    echo "aaaabbbb";
-    $bodyContent = $request->getContent();
-    print_r($bodyContent);
-    logfile($bodyContent);
-});
-
-Route::post('list-product2', function(Request $request) {
-    $headerContent = $request->header();
-    if (array_key_exists("vp6", $headerContent) && $headerContent['vp6'][0] == '12345')
-    {
-        $bodyContent = $request->getContent();
-        print_r($bodyContent);
-        logfile($bodyContent);
-    } else {
-        return abort(404);
-    }
-});
-
 Route::post('/list-product/','ScraperController@getListProduct');
 Route::post('/list-product-images/','ScraperController@getListProductImages');
 Route::get('/test-product/','ScraperController@scrapProduct');

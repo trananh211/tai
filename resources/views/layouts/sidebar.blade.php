@@ -25,10 +25,19 @@
                      with font-awesome or any other icon font library -->
                 <li class="nav-header">Crawler Website</li>
                 <li class="nav-item">
+                    <a href=" {{ url('list-scraper') }}" class="nav-link">
+                        <i class="nav-icon far fa-asterisk"></i>
+                        <p>
+                            1. List Scraper
+                        </p>
+                    </a>
+
+                </li>
+                <li class="nav-item active">
                     <a href=" {{ url('view-scraper') }}" class="nav-link">
                         <i class="nav-icon far fa-asterisk"></i>
                         <p>
-                            1. Scraper Setup
+                            2. Scraper Setup
                         </p>
                     </a>
                 </li>

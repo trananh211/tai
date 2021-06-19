@@ -139,7 +139,7 @@ class CustomCommand extends BaseCommand
     private function test1()
     {
         $scraper_controller = new ScraperController();
-        $check = $scraper_controller->testPost();
+        $check = $scraper_controller->getWebScrap();
         print_r($check);
     }
 }

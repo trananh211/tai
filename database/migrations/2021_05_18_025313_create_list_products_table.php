@@ -15,9 +15,10 @@ class CreateListProductsTable extends Migration
     {
         Schema::create('list_products', function (Blueprint $table) {
             $table->bigIncrements('id');
-	    $table->integer('scrap_id')->default(1);
+	        $table->integer('web_scrap_id')->nullable(false);
             $table->string('product_name','255');
             $table->text('product_link')->nullable(false);
+            $table->text('img')->nullable(true);
             $table->smallInteger('status')->default(0);
             $table->timestamps();
         });

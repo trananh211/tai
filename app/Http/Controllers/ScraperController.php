@@ -52,4 +52,10 @@ class ScraperController extends BaseController
         return $scrapModel->saveProductRunning($result);
     }
     /*END API*/
+
+    public function getWebScrap()
+    {
+        $scrapModel = new Scrap();
+        return $scrapModel->getWebScrap();
+    }
 }

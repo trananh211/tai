@@ -103,6 +103,7 @@ class Admin extends User
             $r = \DB::table('web_scraps')->insert($data);
             if ($r) {
                 $result = true;
+                \Session::forget('get_scrap');
             }
             $alert = 'success';
             $message = 'Đã lưu thành công dữ liệu.';
