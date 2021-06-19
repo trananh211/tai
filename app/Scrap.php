@@ -57,6 +57,7 @@ class Scrap extends Model
                         'web_scrap_id' => $web_scrap_id,
                         'product_name' => trim($item['title']),
                         'product_link' => $link,
+                        'img' => trim($item['img']),
                         'created_at' => dbTime(),
                         'updated_at' => dbTime()
                     ];
