@@ -22,9 +22,9 @@
     }
 
     function logfile_system($str){
-//        echo $str."\n";
         $str .= "\n";
         \Log::channel('custom')->info($str);
+        echo $str."\n";
     }
 
     function dbTime()
@@ -104,6 +104,10 @@
             case env('STATUS_SCRAP_PRODUCT_RUNNING'):
                 $class = 'bg-warning';
                 $view = "Running";
+                break;
+            case env('STATUS_SCRAP_PRODUCT_READY'):
+                $class = 'bg-navy';
+                $view = "Ready";
                 break;
             case env('STATUS_SCRAP_PRODUCT_SUCCESS'):
                 $class = 'bg-success';
