@@ -22,6 +22,7 @@ class CustomCommand extends BaseCommand
      */
     protected $description = 'Command description';
 
+//    protected $array_minute = [ 57, 7, 4, 1];
     protected $array_minute = [1];
 
     /**
@@ -108,12 +109,8 @@ class CustomCommand extends BaseCommand
 
     protected function run57Minute()
     {
-
-    }
-
-    protected function run0Minute()
-    {
-
+        $scraper_controller = new ScraperController();
+        $check = $scraper_controller->getWebScrap();
     }
 
     /*Send data to server clawer*/
@@ -139,7 +136,7 @@ class CustomCommand extends BaseCommand
     private function test1()
     {
         $scraper_controller = new ScraperController();
-        $check = $scraper_controller->getWebScrap();
-        print_r($check);
+        $check = $scraper_controller->sendListProduct();
+        var_dump($check);
     }
 }

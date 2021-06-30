@@ -30,6 +30,12 @@ Route::group(['middleware' => ['member']], function () {
     Route::post('/post-data-scrap-setup', 'AdminController@dataScrapSetup');
     Route::post('/save-data-scrap-setup', 'AdminController@saveDataScrapSetup');
     Route::get('/list-scraper', 'AdminController@getListScraper');
+
+    // Connect Store, edit store
+    Route::get('/list-stores', 'AdminController@listStore');
+    Route::get('/new-template/{id}', 'AdminController@newTemplate');
+    Route::get('/connect-woo', 'AdminController@connectWoo');
+    Route::post('/get-woo-info', 'AdminController@getWooInfo');
 });
 
 

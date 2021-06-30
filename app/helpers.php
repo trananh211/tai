@@ -22,9 +22,9 @@
     }
 
     function logfile_system($str){
-//        echo $str."\n";
         $str .= "\n";
         \Log::channel('custom')->info($str);
+        echo $str."\n";
     }
 
     function dbTime()
@@ -35,6 +35,34 @@
     function convertTime($str_time)
     {
         return gmdate("H:i:s", $str_time);
+    }
+
+    function stores($key)
+    {
+        $stores = [
+            'woo' => env('STORE_WOO_ID'),
+            'shop_base' => env('STORE_SHOPBASE_ID')
+        ];
+        return (array_key_exists($key, $stores)) ? $stores['woo'] : 0;
+    }
+
+    function getTypeStore($value)
+    {
+        $class = '';
+        $view = '';
+        switch ($value) {
+            case env('STORE_WOO_ID'):
+                $class = 'bg-purple';
+                $view = "WooCommerce";
+                break;
+            case env('STORE_SHOPBASE_ID'):
+                $class = 'bg-primary';
+                $view = "Shop Base";
+                break;
+        }
+        echo '<div class="color-palette-set">
+                  <div class="'.$class.' text-center color-palette"><span>'.$view.'</span></div>
+                </div>';
     }
 
     // Data định nghĩa của Scrap Page
@@ -104,6 +132,10 @@
             case env('STATUS_SCRAP_PRODUCT_RUNNING'):
                 $class = 'bg-warning';
                 $view = "Running";
+                break;
+            case env('STATUS_SCRAP_PRODUCT_READY'):
+                $class = 'bg-navy';
+                $view = "Ready";
                 break;
             case env('STATUS_SCRAP_PRODUCT_SUCCESS'):
                 $class = 'bg-success';
