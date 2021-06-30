@@ -1,18 +1,17 @@
 @extends('layouts.master')
 
 <?php
-    $page_title = 'Danh sách các website đang crawl';
-    $page_link = url('list-scraper');
-    $breadcrumb = [
-        'page_title' => $page_title,
-        'page_link' => $page_link
-    ];
-    ?>
+$page_title = 'List Templates';
+$page_link = url('list-template');
+$breadcrumb = [
+    'page_title' => $page_title,
+    'page_link' => $page_link
+];
+?>
 @section('title',$page_title)
 
 @section('content')
     @include('layouts.breadcrumb', $breadcrumb)
-
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -21,7 +20,7 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header bg-info color-palette">
-                            <h3 class="card-title">Danh sách</h3>
+                            <h3 class="card-title">Danh sách Templates</h3>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body table-responsive p-0">
@@ -29,19 +28,23 @@
                                 <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Template</th>
-                                    <th>Url</th>
+                                    <th>Name</th>
+                                    <th>Product Name</th>
+                                    <th>Type</th>
+                                    <th>Store</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                @if(sizeof($lists) > 0)
-                                    @foreach ($lists as $key => $item)
+                                @if(sizeof($templates) > 0)
+                                    @foreach ($templates as $key => $item)
                                         <tr>
                                             <td>{{ ++$key }}</td>
-                                            <td>{{ $item->template_id }}</td>
-                                            <td>{{ $item->url }}</td>
+                                            <td>{{ $item->name }}</td>
+                                            <td>{{ $item->product_name }}</td>
+                                            <td>{!! getTypeStore($item->type_platform) !!}</td>
+                                            <td>{{ $item->store_name}}</td>
                                             <td>{!! getStatus($item->status) !!}</td>
                                             <td>
                                                 Edit | Delete

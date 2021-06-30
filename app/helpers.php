@@ -51,6 +51,10 @@
         $class = '';
         $view = '';
         switch ($value) {
+            case env('STORE_DEFAUTL_ID'):
+                $class = 'bg-orange';
+                $view = "UP TAY";
+                break;
             case env('STORE_WOO_ID'):
                 $class = 'bg-purple';
                 $view = "WooCommerce";

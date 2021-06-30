@@ -34,6 +34,8 @@ Route::group(['middleware' => ['member']], function () {
     // Connect Store, edit store
     Route::get('/list-stores', 'AdminController@listStore');
     Route::get('/new-template/{id}', 'AdminController@newTemplate');
+    Route::post('/check-woo-template', 'WooController@checkTemplate');
+    Route::get('/list-templates', 'AdminController@listTemplate');
     Route::get('/connect-woo', 'AdminController@connectWoo');
     Route::post('/get-woo-info', 'AdminController@getWooInfo');
 });

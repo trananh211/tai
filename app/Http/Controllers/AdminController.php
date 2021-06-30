@@ -48,6 +48,20 @@ class AdminController extends Controller
         }
     }
 
+    public function listTemplate()
+    {
+        $templates = \DB::table('templates as t')
+            ->leftjoin('store_infos as s','s.id', '=', 't.store_info_id')
+            ->select(
+                't.id', 't.name','t.product_name', 't.type_platform','t.status',
+                's.name as store_name'
+            )
+            ->orderBy('id','DESC')
+            ->orderBy('store_info_id')
+            ->get()->toArray();
+        return view('admin.list_templates',compact('templates'));
+    }
+
     public function connectWoo()
     {
         return view('admin.connect_woo');
