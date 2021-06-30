@@ -37,6 +37,34 @@
         return gmdate("H:i:s", $str_time);
     }
 
+    function stores($key)
+    {
+        $stores = [
+            'woo' => env('STORE_WOO_ID'),
+            'shop_base' => env('STORE_SHOPBASE_ID')
+        ];
+        return (array_key_exists($key, $stores)) ? $stores['woo'] : 0;
+    }
+
+    function getTypeStore($value)
+    {
+        $class = '';
+        $view = '';
+        switch ($value) {
+            case env('STORE_WOO_ID'):
+                $class = 'bg-purple';
+                $view = "WooCommerce";
+                break;
+            case env('STORE_SHOPBASE_ID'):
+                $class = 'bg-primary';
+                $view = "Shop Base";
+                break;
+        }
+        echo '<div class="color-palette-set">
+                  <div class="'.$class.' text-center color-palette"><span>'.$view.'</span></div>
+                </div>';
+    }
+
     // Data định nghĩa của Scrap Page
     function dataDefine()
     {

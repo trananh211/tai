@@ -27,6 +27,40 @@ class AdminController extends Controller
         return view('admin.dashboard');
     }
 
+    // connect + setup store
+    public function listStore()
+    {
+        $stores = \DB::table('store_infos')->select('*')->orderBy('type')->get()->toArray();
+        return view('admin.list_stores', compact('stores'));
+    }
+
+    public function newTemplate($id)
+    {
+        $adminModel = new Admin();
+        $result = $adminModel->newTemplate($id);
+        $back = $result['back'];
+        $url = $result['url'];
+        $data = $result['data'];
+        if ($back) {
+            return back()->with('warning', 'Không đúng template ID');
+        } else {
+            return view($url,compact('data'));
+        }
+    }
+
+    public function connectWoo()
+    {
+        return view('admin.connect_woo');
+    }
+
+    public function getWooInfo(Request $request)
+    {
+        $adminModel = new Admin();
+        $return = $adminModel->getWooInfo($request);
+        return back()->with($return['status'], $return['message']);
+    }
+    // End connect + setup store
+
     // Hiển thị trang scrap setup ban đầu
     public function viewScraper()
     {
