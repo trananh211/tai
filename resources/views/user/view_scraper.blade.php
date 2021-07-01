@@ -46,7 +46,12 @@ $breadcrumb = [
                                             <label>Select Template (Bắt Buộc)</label>
                                             <select name="template_id" class="form-control" required>
                                                 <option value="0">Chọn Template</option>
-                                                @foreach( $templates as $template_id => $template_name)
+                                                @foreach( $templates as $key => $item)
+                                                    <?php
+                                                        $template_id = $item->id;
+                                                        $shop = (array_key_exists($item->type_platform, $platforms)) ? $platforms[$item->type_platform] : '';
+                                                        $template_name = $shop.' - '.$item->name;
+                                                    ?>
                                                     <option {{ ($ss_scrap && $template_id == $ss_scrap['template_id']) ? 'selected' : ''}}
                                                             value="{{ $template_id }}"> {{ $template_name }}
                                                     </option>
@@ -54,8 +59,6 @@ $breadcrumb = [
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-sm-6">
                                         <!-- select -->
                                         <div class="form-group">

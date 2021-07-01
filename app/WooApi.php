@@ -28,7 +28,6 @@ class WooApi extends Base
 
     // ham check template woocommerct
     public function checkTemplate($request) {
-//        echo "<pre>";
         $rq = $request->all();
         unset($rq['_token']);
         if (is_array($rq))
@@ -118,6 +117,7 @@ class WooApi extends Base
                         ];
                         $this->processStoreCategoryWoo($woocommerce, $category_data);
                     }
+                    \Session::forget('template_new_woo');
                     $alert = 'success';
                     $message = 'Connect với template thành công';
                     \DB::commit(); // if there was no errors, your query will be executed

@@ -73,18 +73,16 @@
     function dataDefine()
     {
         $platforms = [
-            env('PLATFORM_SHOPBASE_ID') => 'SHOP BASE',
-            env('PLATFORM_WOOCOMMERCE_ID') => 'WOOCOMMERCE SHOP'
+            env('STORE_SHOPBASE_ID') => 'SHOP BASE',
+            env('STORE_WOO_ID') => 'WOOCOMMERCE'
         ];
         $typePageLoad = [
             env('PAGE_LOAD_BUTTON') => 'KIỂU NÚT BẤM',
             env('PAGE_LOAD_SCROLL') => 'KIỂU CUỘN TRANG',
             env('PAGE_LOAD_ONE_PAGE') => 'CHỈ MỘT TRANG'
         ];
-        $templates = [
-            '1' => 'Shopbase - Tshirt',
-            '2' => 'Shopbase - LowTop',
-        ];
+        $templates = \DB::table('templates')->select('id','name','product_name','type_platform')
+            ->orderBy('type_platform')->get()->toArray();
         $data_template = '
             {
                 "url": "https://vetz3d.com/shop?startId=6036571b4dd66d935ec5e512", // Địa chỉ website cần crawl

@@ -94,7 +94,8 @@ class CustomCommand extends BaseCommand
 
     protected function run4Minute()
     {
-
+        $scraper_controller = new ScraperController();
+        $check = $scraper_controller->sendListProduct(); // lấy thông tin ảnh và title của sản phẩm
     }
 
     protected function run7Minute()
@@ -110,7 +111,7 @@ class CustomCommand extends BaseCommand
     protected function run57Minute()
     {
         $scraper_controller = new ScraperController();
-        $check = $scraper_controller->getWebScrap();
+        $check = $scraper_controller->getWebScrap(); // bắt đầu cào từ web để lấy product list
     }
 
     /*Send data to server clawer*/
@@ -136,6 +137,7 @@ class CustomCommand extends BaseCommand
     private function test1()
     {
         $scraper_controller = new ScraperController();
+//        $check = $scraper_controller->getWebScrap();
         $check = $scraper_controller->sendListProduct();
         var_dump($check);
     }
