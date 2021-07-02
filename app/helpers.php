@@ -8,12 +8,16 @@
         \DB::beginTransaction();
         try {
 
+            $result = true;
             \DB::commit(); // if there was no errors, your query will be executed
         } catch (\Exception $e) {
 
+            $result = false;
             $message = 'Xảy ra lỗi ngoài mong muốn: '.$e->getMessage();
             \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
         }
+        $i = 'json_data';
+        $i = json_decode(json_encode($i ,true),true);
     }
 
     function logfile($str){
@@ -22,7 +26,7 @@
     }
 
     function logfile_system($str){
-        $str .= "\n";
+//        $str .= "\n";
         \Log::channel('custom')->info($str);
         echo $str."\n";
     }
@@ -81,8 +85,13 @@
             env('PAGE_LOAD_SCROLL') => 'KIỂU CUỘN TRANG',
             env('PAGE_LOAD_ONE_PAGE') => 'CHỈ MỘT TRANG'
         ];
-        $templates = \DB::table('templates')->select('id','name','product_name','type_platform')
-            ->orderBy('type_platform')->get()->toArray();
+        $templates = \DB::table('templates as temp')
+            ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
+            ->select(
+                'temp.id','temp.name','temp.product_name','temp.type_platform',
+                'skus.sku', 'skus.is_auto as sku_auto'
+            )
+            ->orderBy('temp.type_platform')->get()->toArray();
         $data_template = '
             {
                 "url": "https://vetz3d.com/shop?startId=6036571b4dd66d935ec5e512", // Địa chỉ website cần crawl
@@ -139,9 +148,9 @@
                 $class = 'bg-navy';
                 $view = "Ready";
                 break;
-            case env('STATUS_SCRAP_PRODUCT_SUCCESS'):
+            case env('STATUS_SCRAP_PRODUCT_PROCESS'):
                 $class = 'bg-success';
-                $view = "Success";
+                $view = "Process";
                 break;
         }
         echo '<div class="color-palette-set">

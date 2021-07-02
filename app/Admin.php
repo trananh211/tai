@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Session;
+use \DB;
 
 class Admin extends User
 {
@@ -161,9 +162,14 @@ class Admin extends User
         unset($data['_token']);
         unset($data['type_page_load']);
 
+        // lấy ra kiểu platform đang scrap
+        $type = \DB::table('templates')->select('type_platform')->where('id',$data['template_id'])->first();
+        $type_platform_id = ($type != null) ? $type->type_platform : 0;
+
         $catalog_source = json_decode($data['catalog_source'], true);
         $product_source = json_decode($data['product_source'], true);
 
+        $data['type_platform'] = $type_platform_id;
         $data['url'] = $catalog_source['url'];
         $data['catalog_source'] = json_encode($catalog_source);
         $data['product_source'] = json_encode($product_source);

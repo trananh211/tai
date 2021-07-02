@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Console\Commands\BaseCommand as BaseCommand;
 use App\Http\Controllers\ScraperController;
+use App\Http\Controllers\WooController;
 
 class CustomCommand extends BaseCommand
 {
@@ -136,9 +137,12 @@ class CustomCommand extends BaseCommand
 
     private function test1()
     {
+        echo "<pre>\n";
         $scraper_controller = new ScraperController();
-//        $check = $scraper_controller->getWebScrap();
-        $check = $scraper_controller->sendListProduct();
+        $woo_controller = new WooController();
+//        $check = $scraper_controller->getWebScrap(); // bắt đầu cào từ web để lấy product list
+//        $check = $scraper_controller->sendListProduct(); // lấy thông tin ảnh và title của sản phẩm
+        $check = $woo_controller->createProductWoo(); // tạo sản phẩm woo
         var_dump($check);
     }
 }

@@ -50,7 +50,8 @@ $breadcrumb = [
                                                     <?php
                                                         $template_id = $item->id;
                                                         $shop = (array_key_exists($item->type_platform, $platforms)) ? $platforms[$item->type_platform] : '';
-                                                        $template_name = $shop.' - '.$item->name;
+                                                        $sku = ($item->sku_auto == 1) ? $item->sku.'++' : $item->sku;
+                                                        $template_name = $shop.' - '.$item->name.' - '.$item->product_name.' '.$sku;
                                                     ?>
                                                     <option {{ ($ss_scrap && $template_id == $ss_scrap['template_id']) ? 'selected' : ''}}
                                                             value="{{ $template_id }}"> {{ $template_name }}

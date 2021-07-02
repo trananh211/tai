@@ -16,6 +16,7 @@ class NewTableSkuAutos extends Migration
         Schema::create('skus', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('sku',20)->nullable(false)->unique();
+            $table->smallInteger('is_auto')->default(0);
         });
     }
 

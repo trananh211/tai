@@ -17,9 +17,10 @@ class CreateListProductsTable extends Migration
             $table->bigIncrements('id');
 	        $table->integer('web_scrap_id')->nullable(false);
             $table->string('product_name','255');
+            $table->smallInteger('status')->default(0);
             $table->text('product_link')->nullable(false);
             $table->text('img')->nullable(true);
-            $table->smallInteger('status')->default(0);
+            $table->integer('count');
             $table->timestamps();
         });
     }
