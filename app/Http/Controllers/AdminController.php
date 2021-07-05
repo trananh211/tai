@@ -81,11 +81,12 @@ class AdminController extends Controller
         $data = dataDefine();
         $platforms = $data['platforms'];
         $typePageLoad = $data['typePageLoad'];
+        $typeTag = $data['typeTag'];
         $templates = $data['templates'];
         $data_template = $data['data_template'];
         $product_template = $data['product_template'];
         return view('user.view_scraper')
-            ->with(compact( 'platforms','data_template', 'product_template', 'typePageLoad', 'templates'));
+            ->with(compact( 'platforms','data_template', 'product_template', 'typePageLoad', 'typeTag', 'templates'));
     }
 
     //Nhận data scrap setup ban đầu
@@ -121,10 +122,11 @@ class AdminController extends Controller
             $platforms = $data['platforms'];
             $typePageLoad = $data['typePageLoad'];
             $templates = $data['templates'];
+            $typeTag = $data['typeTag'];
 
             \Session::flash($alert,$message);
             return view('user.last_verify_scrap',
-                compact('lst_product', 'platforms', 'typePageLoad', 'templates'));
+                compact('lst_product', 'platforms', 'typePageLoad', 'typeTag', 'templates'));
         }
 
     }

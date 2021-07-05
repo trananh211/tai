@@ -85,6 +85,14 @@
             env('PAGE_LOAD_SCROLL') => 'KIỂU CUỘN TRANG',
             env('PAGE_LOAD_ONE_PAGE') => 'CHỈ MỘT TRANG'
         ];
+
+        $typeTag = [
+            env('TYPE_TAG_FIXED') => 'Đặt cố định 1 Tag',
+            env('TYPE_TAG_FIRST_TITLE') => 'Lấy ký tự đầu của Title',
+            env('TYPE_TAG_LAST_TITLE') => 'Lấy ký tự cuối của Title',
+            env('TYPE_TAG_POSITION_X') => 'Ký tự thứ X của Title',
+        ];
+
         $templates = \DB::table('templates as temp')
             ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
             ->select(
@@ -119,6 +127,7 @@
         $results = [
             'platforms' => $platforms,
             'typePageLoad' => $typePageLoad,
+            'typeTag' => $typeTag,
             'templates' => $templates,
             'data_template' => $data_template,
             'product_template' => $product_template,

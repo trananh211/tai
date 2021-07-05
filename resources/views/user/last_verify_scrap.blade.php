@@ -91,6 +91,37 @@
                                     </div>
                                 </div>
                                 <div class="row">
+                                    <div class="col-sm-4">
+                                        <!-- select -->
+                                        <div class="form-group">
+                                            <label>Kiểu Tag Sản Phẩm</label>
+                                            <select name="type_tag" class="form-control" required>
+                                                <option value="0">Chọn kiểu</option>
+                                                @foreach( $typeTag as $typeTag_id => $typeTag_name)
+                                                    <option {{ ($ss_scrap && $typeTag_id == $ss_scrap['type_tag']) ? 'selected' : ''}}
+                                                            value="{{ $typeTag_id }}">{{ $typeTag_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label>Tag cố định</label>
+                                            <input value="{{ ($ss_scrap) ? $ss_scrap['tag_text'] : ''}}"
+                                                   type="text" class="form-control" name="tag_text"
+                                                   placeholder="VD: Manchester United">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Vị trí tag</label><smale>Vị trí thứ X trong title</smale>
+                                            <input value="{{ ($ss_scrap) ? $ss_scrap['tag_position'] : ''}}"
+                                                   type="number" class="form-control" name="tag_position"
+                                                   placeholder="VD: 123">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="form-group">
                                         <label>Dữ liệu để crawl</label>
                                         <div class="row">

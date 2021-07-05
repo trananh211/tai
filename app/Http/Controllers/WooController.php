@@ -16,11 +16,17 @@ class WooController extends Controller
     public function createProductWoo() {
         $WooApi = new WooApi();
         $pre_create = $WooApi->preCreateProduct();
-        // nếu pre create có data. tiếp tục tạo mới sp
-        if ($pre_create['result']) {
-               $process = $WooApi->processCreateProduct($pre_create);
+        // nếu pre create có data. tiếp tục check tag
+        if ($pre_create['check_tag']) {
+            $WooApi->processCreateTag($pre_create);
         } else {
-            return $pre_create['result'];
+            // nếu check tag xong. Chuyển sang tạo mới sản phẩm
+            if ($pre_create['result']) {
+                $process = $WooApi->processCreateProduct($pre_create);
+            } else {
+                return $pre_create['result'];
+            }
         }
+
     }
 }

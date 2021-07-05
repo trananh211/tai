@@ -40,4 +40,17 @@ class Base extends Model
         $product_name .= ' '.$sku;
         return $product_name;
     }
+
+    // Hàm trả về string và loại bỏ ký tự đặc biệt
+    public function getStringSpecialRemove($string) {
+        $string = preg_replace('/[^A-Za-z0-9\_]/', ' ', strip_tags($string)); // Removes special chars.
+        return $string;
+    }
+
+    // Hàm trả về string và loại bỏ ký tự đặc biệt
+    public function getStringNormal($string) {
+        $string = str_replace('', '-', $string); // Replaces all spaces with hyphens.
+        $string = preg_replace('/[^A-Za-z0-9\-]/', '', strip_tags($string)); // Removes special chars.
+        return $string;
+    }
 }

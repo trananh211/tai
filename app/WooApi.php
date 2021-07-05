@@ -218,7 +218,6 @@ class WooApi extends Base
      *  CREAT PRODUCT
      *
      * */
-
     // Hàm chuẩn bị dữ liệu trước khi tạo mới sản phẩm
     public function preCreateProduct() {
         logfile_system('==================== CREATE PRODUCT WOOCOMMERCE =====================');
@@ -226,7 +225,7 @@ class WooApi extends Base
         $web_scrap = \DB::table('web_scraps as wsc')
             ->select(
                 'wsc.id as web_scrap_id', 'wsc.url as web_scrap_url', 'wsc.template_id', 'wsc.exclude_text',
-                'wsc.image_array', 'wsc.first_title'
+                'wsc.image_array', 'wsc.first_title', 'wsc.type_tag', 'wsc.tag_text', 'wsc.tag_position'
             )
             ->where('wsc.status', env('STATUS_SCRAP_PRODUCT_PROCESS'))
             ->where('wsc.type_platform', env('STORE_WOO_ID'))
@@ -234,57 +233,257 @@ class WooApi extends Base
         $products = [];
         $templates = [];
         $template_variations = [];
+        $check_tag = false;
+        $result = false;
         if ($web_scrap == null) {
             logfile_system('Đã hết website để tạo mới product. Chuyển sang công việc khác');
-            $result = false;
         } else {
             $web_scrap_id = $web_scrap->web_scrap_id;
-            // lấy ra danh sách product để tạo mới
-            $products = \DB::table('list_products as lpd')
-                ->select(
-                    'lpd.id as list_product_id', 'lpd.product_name' ,'lpd.product_link', 'lpd.count'
-                )
-                ->where('lpd.status',env('STATUS_SCRAP_PRODUCT_READY'))
-                ->where('lpd.web_scrap_id', $web_scrap_id)
-                ->orderBy('lpd.id','ASC')
-                ->limit(env('LIMIT_CREATE_WOO_PRODUCT'))
-                ->get()->toArray();
-            if (sizeof($products) > 0) {
-                $result = true;
-                $template_id = $web_scrap->template_id;
-                $templates = \DB::table('templates as temp')
-                    ->leftjoin('store_infos as info','temp.store_info_id', '=', 'info.id')
-                    ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
-                    ->leftjoin('store_categories','temp.store_category_id', '=', 'store_categories.id')
-                    ->select(
-                        'skus.sku', 'skus.is_auto',
-                        'store_categories.store_category_id', 'store_categories.name as store_category_name', 'store_categories.slug as store_category_slug',
-                        'info.url', 'info.consumer_key', 'info.consumer_secret',
-                        'temp.id as template_id', 'temp.woo_template_source'
-                    )
-                    ->where('temp.id', $template_id)
-                    ->first();
-                $template_variations = \DB::table('template_variations')
-                    ->select('id','template_id','variation_source')
-                    ->where('template_id', $template_id)
-                    ->get()->toArray();
+            // kiểm tra xem product đã có đủ tag hết chưa.
+            $check_tag_null = \DB::table('list_products')->select('id')
+                ->where('status', env('STATUS_SCRAP_PRODUCT_READY'))
+                ->where('web_scrap_id', $web_scrap_id)
+                ->whereNull('store_tag_id')
+                ->count();
+            // nếu vẫn còn product chưa có tag.
+            if ($check_tag_null > 0) {
+                logfile_system('Phát hiện ra có '.$check_tag_null.' sản phẩm chưa được khai báo tag. Tạo luôn bây giờ');
+                $check_tag = true;
             } else {
-                logfile_system('Website '.$web_scrap->web_scrap_url.' đã hết product để tạo mới. Cập nhật trạng thái web này.');
-                \DB::table('web_scraps')->where('id',$web_scrap_id)
-                    ->update([
-                        'status' => env('STATUS_SCRAP_PRODUCT_FINISH'),
-                        'updated_at' => dbTime()
-                    ]);
-                $result = false;
+                logfile_system('Toàn bộ sản phẩm đã được khai báo tag. Chuyển sang tạo mới sản phẩm');
+                // lấy ra danh sách product để tạo mới
+                $products = \DB::table('list_products as lpd')
+                    ->select(
+                        'lpd.id as list_product_id', 'lpd.product_name' ,'lpd.product_link', 'lpd.count', 'lpd.store_tag_id'
+                    )
+                    ->where('lpd.status',env('STATUS_SCRAP_PRODUCT_READY'))
+                    ->where('lpd.web_scrap_id', $web_scrap_id)
+                    ->orderBy('lpd.id','ASC')
+                    ->limit(env('LIMIT_CREATE_WOO_PRODUCT'))
+                    ->get()->toArray();
+                if (sizeof($products) > 0) {
+                    $template_id = $web_scrap->template_id;
+                    $templates = \DB::table('templates as temp')
+                        ->leftjoin('store_infos as info','temp.store_info_id', '=', 'info.id')
+                        ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
+                        ->leftjoin('store_categories','temp.store_category_id', '=', 'store_categories.id')
+                        ->select(
+                            'skus.sku', 'skus.is_auto',
+                            'store_categories.store_category_id', 'store_categories.name as store_category_name', 'store_categories.slug as store_category_slug',
+                            'info.url', 'info.consumer_key', 'info.consumer_secret',
+                            'temp.id as template_id', 'temp.woo_template_source'
+                        )
+                        ->where('temp.id', $template_id)
+                        ->first();
+                    $template_variations = \DB::table('template_variations')
+                        ->select('id','template_id','variation_source')
+                        ->where('template_id', $template_id)
+                        ->get()->toArray();
+                    $result = true;
+                } else {
+                    logfile_system('Website '.$web_scrap->web_scrap_url.' đã hết product để tạo mới. Cập nhật trạng thái web này.');
+                    \DB::table('web_scraps')->where('id',$web_scrap_id)
+                        ->update([
+                            'status' => env('STATUS_SCRAP_PRODUCT_FINISH'),
+                            'updated_at' => dbTime()
+                        ]);
+                }
             }
         }
-        return [
+        $results = [
             'result' => $result,
+            'check_tag' => $check_tag,
             'web_scrap' => $web_scrap,
             'templates' => $templates,
             'template_variations' => $template_variations,
             'products' => $products
         ];
+        return $results;
+    }
+
+    // Hàm kiểm tra vào tạo mới tag của product
+    public function processCreateTag($preData)
+    {
+        $web_scrap = $preData['web_scrap'];
+        $template_id = $web_scrap->template_id;
+        $web_scrap_id = $web_scrap->web_scrap_id;
+        // lấy ra thông tin kết nối với woocommerce
+        $templates = \DB::table('templates as temp')
+            ->leftjoin('store_infos as info', 'temp.store_info_id', '=', 'info.id')
+            ->select(
+                'info.id as store_info_id', 'info.url', 'info.consumer_key', 'info.consumer_secret',
+                'temp.id as template_id'
+            )
+            ->where('temp.id', $template_id)
+            ->first();
+        // lấy ra danh sách product chưa có tag
+        $products = \DB::table('list_products as lpd')
+            ->select('lpd.id as list_product_id', 'lpd.product_name')
+            ->where('lpd.status', env('STATUS_SCRAP_PRODUCT_READY'))
+            ->where('lpd.web_scrap_id', $web_scrap_id)
+            ->whereNull('lpd.store_tag_id')
+            ->limit(env('LIMIT_CREATE_WOO_TAG'))
+            ->get()->toArray();
+        // nếu tồn tại product chưa có tag. Tạo mới tag
+        if (sizeof($products) > 0) {
+            $result = false;
+            $check_tag = true;
+
+            $array_tags = [];
+            // chia làm 2 trường hợp. tag cố định và không cố định
+            if ($web_scrap->type_tag == env('TYPE_TAG_FIXED')) {
+                $tag_text = strtolower($this->getStringNormal($web_scrap->tag_text));
+                foreach ($products as $product) {
+                    $array_tags[$tag_text][] = $product->list_product_id;
+                }
+            } else {
+                foreach ($products as $product) {
+                    $product_name = $this->getStringSpecialRemove($product->product_name);
+                    $ar_tmp_name = array_filter(explode(" ", $product_name), 'strlen');
+                    // nếu tag là ký tự đầu tiên
+                    if ($web_scrap->type_tag == env('TYPE_TAG_FIRST_TITLE')) {
+                        $tag_text = reset($ar_tmp_name);
+                    } else if ($web_scrap->type_tag == env('TYPE_TAG_LAST_TITLE')) { // nếu tag là ký tự cuối cùng
+                        $tag_text = end($ar_tmp_name);
+                    } else if ($web_scrap->type_tag == env('TYPE_TAG_POSITION_X')) { // nếu tag là kiểu vị trí
+                        $position = $web_scrap->tag_position;
+                        $tag_text = 'null';
+                        $i = 1;
+                        foreach ($ar_tmp_name as $text) {
+                            if ($position == $i) {
+                                $tag_text = $text;
+                                break;
+                            }
+                            $i++;
+                        }
+                    }
+                    $tag_text = strtolower($this->getStringNormal($tag_text));
+                    $array_tags[$tag_text][] = $product->list_product_id;
+                }
+            }
+            // trả về toàn bộ tag trong 1 mảng
+            $list_tags = array_keys($array_tags);
+            // kiểm tra xem hệ thống đã có tag hay chưa
+            if (sizeof($list_tags) > 0) {
+                $tags = \DB::table('store_tags')
+                    ->select('id', 'name', 'slug')
+                    ->whereIn('name', $list_tags)
+                    ->where('store_info_id', $templates->store_info_id)
+                    ->where('type_platform', env('STORE_WOO_ID'))
+                    ->get()->toArray();
+                $data_tags = [];
+                // nếu có tags thì so sánh và lấy ra tag để import.
+                if (sizeof($tags) > 0) {
+                    foreach ($tags as $key => $tag_info) {
+                        $tag_name = $tag_info->name;
+                        $data_tags[$tag_name]['info'] = [
+                            'store_tag_id' => $tag_info->id,
+                            'name' => $tag_info->name,
+                            'slug' => $tag_info->slug,
+                        ];
+                        // nếu tồn tại tên ở trong array tag. thì thêm info và xoá ở array tag
+                        if (array_key_exists($tag_name, $array_tags)) {
+                            logfile_system('Tồn tại tag : "' . $tag_name . '" trong database. Chỉ cần lấy ra để kết nối product.');
+                            $data_tags[$tag_name]['lists'] = $array_tags[$tag_name];
+                            unset($array_tags[$tag_name]);
+                        }
+                    }
+                }
+                if (array_key_exists('null', $array_tags)) {
+                    \DB::table('list_products')->whereIn('id',$array_tags['null'])->update([
+                        'store_tag_id' => 0,
+                        'updated_at' => dbTime()
+                    ]);
+                    unset($array_tags['null']);
+                }
+
+                // nếu array tag vẫn cần tạo tag mới.
+                if (sizeof($array_tags) > 0) {
+                    // kết nối với woocomerce store và tạo tag
+                    $woocommerce = $this->getConnectStore($templates->url, $templates->consumer_key, $templates->consumer_secret);
+                    foreach ($array_tags as $tag_name => $list_product_ids) {
+                        if (is_string($tag_name) && $tag_name != 'null') {
+                            $store_tags_data = [];
+                            $data = [
+                                'slug' => $tag_name,
+                            ];
+                            logfile_system('Kết nối tới woocomerce để quét thông tin tag : ' . $tag_name);
+                            // kết nối tới woocommerce store để lấy thông tin
+                            $result = $woocommerce->get('products/tags', $data);
+                            //nếu không thấy thông tin thì tạo mới
+                            if (sizeof($result) == 0) {
+                                logfile_system('- Không tìm thấy thông tin tag : ' . $tag_name . '. Tạo mới và lưu vào database');
+                                $data = [
+                                    'name' => $tag_name
+                                ];
+                                $i = $woocommerce->post('products/tags', $data);
+                                $store_tags_data = [
+                                    'name' => $i->name,
+                                    'slug' => $i->slug,
+                                    'type_platform' => env('STORE_WOO_ID'),
+                                    'store_tag_id' => $i->id,
+                                    'store_info_id' => $templates->store_info_id,
+                                    'created_at' => dbTime(),
+                                    'updated_at' => dbTime()
+                                ];
+                                $store_tag_name = $i->name;
+                                $store_tag_slug = $i->slug;
+                            } else { // nếu thấy thông tin thì lấy dữ liệu và lưu về database
+                                logfile_system('- Đã tồn tại thông tin tag : ' . $tag_name . '. Tạo mới và lưu vào database');
+                                $store_tags_data = [
+                                    'name' => $result[0]->name,
+                                    'slug' => $result[0]->slug,
+                                    'type_platform' => env('STORE_WOO_ID'),
+                                    'store_tag_id' => $result[0]->id,
+                                    'store_info_id' => $templates->store_info_id,
+                                    'created_at' => dbTime(),
+                                    'updated_at' => dbTime()
+                                ];
+                                $store_tag_name = $result[0]->name;
+                                $store_tag_slug = $result[0]->slug;
+                            }
+                            // nếu tồn tại store_tag_data thì tạo mới
+                            if (sizeof($store_tags_data) > 0) {
+                                logfile_system('- Lưu thông tin của tags : "' . $tag_name . '" vào database thành công');
+                                $store_tags_id = \DB::table('store_tags')->insertGetId($store_tags_data);
+                                $data_tags[$tag_name]['info'] = [
+                                    'store_tag_id' => $store_tags_id,
+                                    'name' => $store_tag_name,
+                                    'slug' => $store_tag_slug
+                                ];
+                                // nếu tồn tại tên ở trong array tag. thì thêm info và xoá ở array tag
+                                if (array_key_exists($tag_name, $array_tags)) {
+                                    $data_tags[$tag_name]['lists'] = $list_product_ids;
+                                }
+
+                            } else {
+                                logfile_system('Phát hiện tag : ' . $tag_name . ' không phải là kiểu tag bình thường. Bỏ qua');
+                            }
+                        }
+                    }
+                }
+            }
+            // nếu tồn thông tin data tag
+            if( sizeof($data_tags) > 0) {
+                foreach ($data_tags as $tag_name => $info ) {
+                    var_dump($info['info']['store_tag_id']);
+                    $update_data = [
+                        'store_tag_id' => $info['info']['store_tag_id'],
+                        'updated_at' => dbTime()
+                    ];
+                    if (array_key_exists('lists', $info) && sizeof($info['lists']) > 0) {
+                        \DB::table('list_products')->whereIn('id',$info['lists'])->update($update_data);
+                    }
+                }
+            }
+        } else {
+            $result = true;
+            $check_tag = false;
+        }
+        $preData['result'] = $result;
+        $preData['$check_tag'] = $check_tag;
+
+        return $preData;
     }
 
     // bắt đầu tạo mới sản phẩm

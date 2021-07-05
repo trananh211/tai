@@ -101,32 +101,39 @@ class Admin extends User
         $message = '';
         $return = 0;
         if ($data['template_id'] != 0 && $data['type_page_load'] != 0 && $data['catalog_source'] != null &&
-            $data['product_source'] != null) {
-            if (is_array($catalog_source) && is_array($product_source))
-            {
-                $template_id = $data['template_id'];
-                $url = $catalog_source['url'];
-                $data['url'] = $url;
-                $check_exist = \DB::table('web_scraps')->select('id')
-                    ->where(['template_id' => $template_id, 'url' => $url])->first();
-                // nếu đã tồn tại link đã scrap trước đó.
-                if ($check_exist != NULL)
-                {
-                    $alert = 'warning';
-                    $message = 'Không thể thực hiện vì bạn đã yêu cầu Crawl websilte : '.$url.' trước đó rồi.';
-                } else {
-                    $catalog_source['typePageLoad'] = $data['type_page_load'];
-                    $data['catalog_source'] = json_encode($catalog_source);
-                    $data['product_source'] = json_encode($product_source);
-                    $return = 1;
-                    $alert = 'success';
-                    $message = 'Toàn bộ data được pass đúng định dạng.';
-                }
+            $data['product_source'] != null && $data['type_tag'] != 0) {
+            // kiểm tra tag trước
+            if ($data['type_tag'] == env('TYPE_TAG_FIXED') && $data['tag_text'] == '') {
+                $message = 'Khi chọn cố định 1 tag duy nhất. Bạn phải điền Tag cố định. Mời bạn thử lại';
+            } else if ($data['type_tag'] == env('TYPE_TAG_POSITION_X') && ($data['tag_position'] == '' || !is_numeric($data['tag_position']))) {
+                $message = 'Khi chọn tag theo vị trí của title. Bạn cần khai báo Vị trí tag và yêu cầu điền bằng số';
             } else {
-                if (!is_array($catalog_source)) {
-                    $message = 'Sai định dạng Catalog Source. Bạn cần điền lại cho đúng định dạng.';
-                } else if (!is_array($product_source)) {
-                    $message = 'Sai định dạng Product Source. Bạn cần điền lại cho đúng định dạng.';
+                if (is_array($catalog_source) && is_array($product_source))
+                {
+                    $template_id = $data['template_id'];
+                    $url = $catalog_source['url'];
+                    $data['url'] = $url;
+                    $check_exist = \DB::table('web_scraps')->select('id')
+                        ->where(['template_id' => $template_id, 'url' => $url])->first();
+                    // nếu đã tồn tại link đã scrap trước đó.
+                    if ($check_exist != NULL)
+                    {
+                        $alert = 'warning';
+                        $message = 'Không thể thực hiện vì bạn đã yêu cầu Crawl websilte : '.$url.' trước đó rồi.';
+                    } else {
+                        $catalog_source['typePageLoad'] = $data['type_page_load'];
+                        $data['catalog_source'] = json_encode($catalog_source);
+                        $data['product_source'] = json_encode($product_source);
+                        $return = 1;
+                        $alert = 'success';
+                        $message = 'Toàn bộ data được pass đúng định dạng.';
+                    }
+                } else {
+                    if (!is_array($catalog_source)) {
+                        $message = 'Sai định dạng Catalog Source. Bạn cần điền lại cho đúng định dạng.';
+                    } else if (!is_array($product_source)) {
+                        $message = 'Sai định dạng Product Source. Bạn cần điền lại cho đúng định dạng.';
+                    }
                 }
             }
         } else {
@@ -135,6 +142,8 @@ class Admin extends User
                 $message = 'Bạn phải chọn Template';
             } else if ($data['type_page_load'] == 0) {
                 $message = 'Bạn phải chọn kiểu tải trang';
+            } else if ($data['type_tag'] == 0) {
+                $message = 'Bạn phải chọn kiểu khai báo Tag cho sản phẩm';
             } else if ($data['catalog_source'] == null) {
                 $message = 'Bạn phải điền catalog source';
             } else if ($data['product_source'] == null) {
@@ -142,13 +151,14 @@ class Admin extends User
             }
         }
 
-        return [
+        $result = [
             'return' => $return,
             'alert' => $alert,
             'message' => $message,
             'data' => $data,
             'verify_data' => $verify_data
         ];
+        return $result;
     }
 
     // lưu thông tin website scrap vào database sau khi verify thành công
