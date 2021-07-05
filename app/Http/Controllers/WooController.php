@@ -23,6 +23,7 @@ class WooController extends Controller
             // nếu check tag xong. Chuyển sang tạo mới sản phẩm
             if ($pre_create['result']) {
                 $process = $WooApi->processCreateProduct($pre_create);
+                return $process['result'];
             } else {
                 return $pre_create['result'];
             }

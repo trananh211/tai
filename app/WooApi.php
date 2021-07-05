@@ -32,12 +32,12 @@ class WooApi extends Base
      * */
 
     // ham check template woocommerct
-    public function checkTemplate($request) {
+    public function checkTemplate($request)
+    {
         $rq = $request->all();
         unset($rq['_token']);
-        if (is_array($rq))
-        {
-            \Session::put('template_new_woo',$rq);
+        if (is_array($rq)) {
+            \Session::put('template_new_woo', $rq);
         }
         $alert = 'error';
         $message = '';
@@ -63,14 +63,14 @@ class WooApi extends Base
             }
             $check_sku_exist = $this->checkExistSku($string_sku);
             if ($check_sku_exist) {
-                $message = 'SKU : "'.$string_sku.'" đã tồn tại. Mời bạn chọn SKU khác';
+                $message = 'SKU : "' . $string_sku . '" đã tồn tại. Mời bạn chọn SKU khác';
             } else {
                 // kiểm tra sự tồn tại của template hay chưa
                 $check_template_exist = \DB::table('templates')->select('id')
                     ->where('store_info_id', $store_info_id)
                     ->where('store_template_id', $store_template_id)
                     ->first();
-                if($check_template_exist == NULL) {
+                if ($check_template_exist == NULL) {
                     $back = false;
                 } else {
                     $message = 'Đã tồn tại template này trong hệ thống rồi.';
@@ -95,7 +95,7 @@ class WooApi extends Base
                     // lấy ra Sku ID
                     $sku_id = $this->getSkuAutoId($string_sku, $sku_auto);
                     //Convert template to Array
-                    $tmp = json_decode(json_encode($i ,true),true);
+                    $tmp = json_decode(json_encode($i, true), true);
                     $result_templates = $this->processTemplateData($tmp);
                     $data = [
                         'name' => trim($rq['name']),
@@ -133,20 +133,21 @@ class WooApi extends Base
                     \DB::commit(); // if there was no errors, your query will be executed
                 } catch (\Exception $e) {
                     $alert = 'error';
-                    $message = 'Xảy ra lỗi ngoài mong muốn: '.$e->getMessage();
+                    $message = 'Xảy ra lỗi ngoài mong muốn: ' . $e->getMessage();
                     \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
                 }
                 return redirect('list-templates')->with($alert, $message);
             } else {
                 $alert = 'error';
-                $message = 'Không thể tìm thấy product id : '.$rq['store_template_id'].' của store : '.$rq['store_name'];
+                $message = 'Không thể tìm thấy product id : ' . $rq['store_template_id'] . ' của store : ' . $rq['store_name'];
                 return back()->with($alert, $message);
             }
         }
     }
 
     // Ham phân tích data template để trả về dữ liệu json phục vụ mục đích lưu vào database
-    private function processTemplateData($data) {
+    private function processTemplateData($data)
+    {
         //xoa cac key khong can thiet
         $deleted = array('id', 'slug', 'permalink', 'price_html', 'images', '_links', 'meta_data');
         foreach ($deleted as $v) {
@@ -162,7 +163,8 @@ class WooApi extends Base
     }
 
     // Hàm lưu thông tin data variations list vào database
-    private function processTemplateVariation($woocommerce, $variation_list, $template_id, $store_info_id, $store_template_id) {
+    private function processTemplateVariation($woocommerce, $variation_list, $template_id, $store_info_id, $store_template_id)
+    {
         for ($j = 0; $j < sizeof($variation_list); $j++) {
             $varid = $variation_list[$j];
             $variation_data = $woocommerce->get('products/' . $template_id . '/variations/' . $varid);
@@ -182,7 +184,8 @@ class WooApi extends Base
     }
 
     // Hàm lưu thông tin category data vào database
-    private function processStoreCategoryWoo($woocommerce, $data) {
+    private function processStoreCategoryWoo($woocommerce, $data)
+    {
         $category_name = $data['category_name'];
         $store_info_id = $data['store_info_id'];
         // kiểm tra với woo_categories có sẵn tại tool xem tồn tại chưa.
@@ -209,7 +212,7 @@ class WooApi extends Base
             ];
             $store_category_id = \DB::table('store_categories')->insertGetId($insert_data);
         }
-        \DB::table('templates')->where('id',$data['template_id'])->update(['store_category_id' => $store_category_id]);
+        \DB::table('templates')->where('id', $data['template_id'])->update(['store_category_id' => $store_category_id]);
     }
     /* ================================= End create template ========================================*/
 
@@ -219,7 +222,8 @@ class WooApi extends Base
      *
      * */
     // Hàm chuẩn bị dữ liệu trước khi tạo mới sản phẩm
-    public function preCreateProduct() {
+    public function preCreateProduct()
+    {
         logfile_system('==================== CREATE PRODUCT WOOCOMMERCE =====================');
         // kiểm tra website đang ở trạng thái process
         $web_scrap = \DB::table('web_scraps as wsc')
@@ -247,26 +251,28 @@ class WooApi extends Base
                 ->count();
             // nếu vẫn còn product chưa có tag.
             if ($check_tag_null > 0) {
-                logfile_system('Phát hiện ra có '.$check_tag_null.' sản phẩm chưa được khai báo tag. Tạo luôn bây giờ');
+                logfile_system('Phát hiện ra có ' . $check_tag_null . ' sản phẩm chưa được khai báo tag. Tạo luôn bây giờ');
                 $check_tag = true;
             } else {
                 logfile_system('Toàn bộ sản phẩm đã được khai báo tag. Chuyển sang tạo mới sản phẩm');
                 // lấy ra danh sách product để tạo mới
                 $products = \DB::table('list_products as lpd')
+                    ->leftjoin('store_tags as tags', 'lpd.store_tag_id', '=', 'tags.id')
                     ->select(
-                        'lpd.id as list_product_id', 'lpd.product_name' ,'lpd.product_link', 'lpd.count', 'lpd.store_tag_id'
+                        'lpd.id as list_product_id', 'lpd.product_name', 'lpd.product_link', 'lpd.count', 'lpd.store_tag_id',
+                        'tags.store_tag_id', 'tags.name as tag_name', 'tags.slug'
                     )
-                    ->where('lpd.status',env('STATUS_SCRAP_PRODUCT_READY'))
+                    ->where('lpd.status', env('STATUS_SCRAP_PRODUCT_READY'))
                     ->where('lpd.web_scrap_id', $web_scrap_id)
-                    ->orderBy('lpd.id','ASC')
+                    ->orderBy('lpd.id', 'ASC')
                     ->limit(env('LIMIT_CREATE_WOO_PRODUCT'))
                     ->get()->toArray();
                 if (sizeof($products) > 0) {
                     $template_id = $web_scrap->template_id;
                     $templates = \DB::table('templates as temp')
-                        ->leftjoin('store_infos as info','temp.store_info_id', '=', 'info.id')
-                        ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
-                        ->leftjoin('store_categories','temp.store_category_id', '=', 'store_categories.id')
+                        ->leftjoin('store_infos as info', 'temp.store_info_id', '=', 'info.id')
+                        ->leftjoin('skus', 'temp.sku_id', '=', 'skus.id')
+                        ->leftjoin('store_categories', 'temp.store_category_id', '=', 'store_categories.id')
                         ->select(
                             'skus.sku', 'skus.is_auto',
                             'store_categories.store_category_id', 'store_categories.name as store_category_name', 'store_categories.slug as store_category_slug',
@@ -276,13 +282,13 @@ class WooApi extends Base
                         ->where('temp.id', $template_id)
                         ->first();
                     $template_variations = \DB::table('template_variations')
-                        ->select('id','template_id','variation_source')
+                        ->select('id', 'template_id', 'variation_source')
                         ->where('template_id', $template_id)
                         ->get()->toArray();
                     $result = true;
                 } else {
-                    logfile_system('Website '.$web_scrap->web_scrap_url.' đã hết product để tạo mới. Cập nhật trạng thái web này.');
-                    \DB::table('web_scraps')->where('id',$web_scrap_id)
+                    logfile_system('Website ' . $web_scrap->web_scrap_url . ' đã hết product để tạo mới. Cập nhật trạng thái web này.');
+                    \DB::table('web_scraps')->where('id', $web_scrap_id)
                         ->update([
                             'status' => env('STATUS_SCRAP_PRODUCT_FINISH'),
                             'updated_at' => dbTime()
@@ -389,90 +395,86 @@ class WooApi extends Base
                         }
                     }
                 }
-                if (array_key_exists('null', $array_tags)) {
-                    \DB::table('list_products')->whereIn('id',$array_tags['null'])->update([
-                        'store_tag_id' => 0,
-                        'updated_at' => dbTime()
-                    ]);
-                    unset($array_tags['null']);
-                }
+//                if (array_key_exists('null', $array_tags)) {
+//                    \DB::table('list_products')->whereIn('id',$array_tags['null'])->update([
+//                        'store_tag_id' => 0,
+//                        'updated_at' => dbTime()
+//                    ]);
+//                    unset($array_tags['null']);
+//                }
 
                 // nếu array tag vẫn cần tạo tag mới.
                 if (sizeof($array_tags) > 0) {
                     // kết nối với woocomerce store và tạo tag
                     $woocommerce = $this->getConnectStore($templates->url, $templates->consumer_key, $templates->consumer_secret);
                     foreach ($array_tags as $tag_name => $list_product_ids) {
-                        if (is_string($tag_name) && $tag_name != 'null') {
-                            $store_tags_data = [];
+                        $store_tags_data = [];
+                        $data = [
+                            'slug' => $tag_name,
+                        ];
+                        logfile_system('Kết nối tới woocomerce để quét thông tin tag : ' . $tag_name);
+                        // kết nối tới woocommerce store để lấy thông tin
+                        $result = $woocommerce->get('products/tags', $data);
+                        //nếu không thấy thông tin thì tạo mới
+                        if (sizeof($result) == 0) {
+                            logfile_system('- Không tìm thấy thông tin tag : ' . $tag_name . '. Tạo mới và lưu vào database');
                             $data = [
-                                'slug' => $tag_name,
+                                'name' => $tag_name
                             ];
-                            logfile_system('Kết nối tới woocomerce để quét thông tin tag : ' . $tag_name);
-                            // kết nối tới woocommerce store để lấy thông tin
-                            $result = $woocommerce->get('products/tags', $data);
-                            //nếu không thấy thông tin thì tạo mới
-                            if (sizeof($result) == 0) {
-                                logfile_system('- Không tìm thấy thông tin tag : ' . $tag_name . '. Tạo mới và lưu vào database');
-                                $data = [
-                                    'name' => $tag_name
-                                ];
-                                $i = $woocommerce->post('products/tags', $data);
-                                $store_tags_data = [
-                                    'name' => $i->name,
-                                    'slug' => $i->slug,
-                                    'type_platform' => env('STORE_WOO_ID'),
-                                    'store_tag_id' => $i->id,
-                                    'store_info_id' => $templates->store_info_id,
-                                    'created_at' => dbTime(),
-                                    'updated_at' => dbTime()
-                                ];
-                                $store_tag_name = $i->name;
-                                $store_tag_slug = $i->slug;
-                            } else { // nếu thấy thông tin thì lấy dữ liệu và lưu về database
-                                logfile_system('- Đã tồn tại thông tin tag : ' . $tag_name . '. Tạo mới và lưu vào database');
-                                $store_tags_data = [
-                                    'name' => $result[0]->name,
-                                    'slug' => $result[0]->slug,
-                                    'type_platform' => env('STORE_WOO_ID'),
-                                    'store_tag_id' => $result[0]->id,
-                                    'store_info_id' => $templates->store_info_id,
-                                    'created_at' => dbTime(),
-                                    'updated_at' => dbTime()
-                                ];
-                                $store_tag_name = $result[0]->name;
-                                $store_tag_slug = $result[0]->slug;
-                            }
-                            // nếu tồn tại store_tag_data thì tạo mới
-                            if (sizeof($store_tags_data) > 0) {
-                                logfile_system('- Lưu thông tin của tags : "' . $tag_name . '" vào database thành công');
-                                $store_tags_id = \DB::table('store_tags')->insertGetId($store_tags_data);
-                                $data_tags[$tag_name]['info'] = [
-                                    'store_tag_id' => $store_tags_id,
-                                    'name' => $store_tag_name,
-                                    'slug' => $store_tag_slug
-                                ];
-                                // nếu tồn tại tên ở trong array tag. thì thêm info và xoá ở array tag
-                                if (array_key_exists($tag_name, $array_tags)) {
-                                    $data_tags[$tag_name]['lists'] = $list_product_ids;
-                                }
-
-                            } else {
-                                logfile_system('Phát hiện tag : ' . $tag_name . ' không phải là kiểu tag bình thường. Bỏ qua');
-                            }
+                            $i = $woocommerce->post('products/tags', $data);
+                            $store_tags_data = [
+                                'name' => $i->name,
+                                'slug' => $i->slug,
+                                'type_platform' => env('STORE_WOO_ID'),
+                                'store_tag_id' => $i->id,
+                                'store_info_id' => $templates->store_info_id,
+                                'created_at' => dbTime(),
+                                'updated_at' => dbTime()
+                            ];
+                            $store_tag_name = $i->name;
+                            $store_tag_slug = $i->slug;
+                        } else { // nếu thấy thông tin thì lấy dữ liệu và lưu về database
+                            logfile_system('- Đã tồn tại thông tin tag : ' . $tag_name . '. Tạo mới và lưu vào database');
+                            $store_tags_data = [
+                                'name' => $result[0]->name,
+                                'slug' => $result[0]->slug,
+                                'type_platform' => env('STORE_WOO_ID'),
+                                'store_tag_id' => $result[0]->id,
+                                'store_info_id' => $templates->store_info_id,
+                                'created_at' => dbTime(),
+                                'updated_at' => dbTime()
+                            ];
+                            $store_tag_name = $result[0]->name;
+                            $store_tag_slug = $result[0]->slug;
                         }
+                        // nếu tồn tại store_tag_data thì tạo mới
+                        if (sizeof($store_tags_data) > 0) {
+                            logfile_system('- Lưu thông tin của tags : "' . $tag_name . '" vào database thành công');
+                            $store_tags_id = \DB::table('store_tags')->insertGetId($store_tags_data);
+                            $data_tags[$tag_name]['info'] = [
+                                'store_tag_id' => $store_tags_id,
+                                'name' => $store_tag_name,
+                                'slug' => $store_tag_slug
+                            ];
+                            // nếu tồn tại tên ở trong array tag. thì thêm info và xoá ở array tag
+                            if (array_key_exists($tag_name, $array_tags)) {
+                                $data_tags[$tag_name]['lists'] = $list_product_ids;
+                            }
+
+                        }
+
                     }
                 }
             }
             // nếu tồn thông tin data tag
-            if( sizeof($data_tags) > 0) {
-                foreach ($data_tags as $tag_name => $info ) {
-                    var_dump($info['info']['store_tag_id']);
+            if (sizeof($data_tags) > 0) {
+                foreach ($data_tags as $tag_name => $info) {
                     $update_data = [
                         'store_tag_id' => $info['info']['store_tag_id'],
                         'updated_at' => dbTime()
                     ];
                     if (array_key_exists('lists', $info) && sizeof($info['lists']) > 0) {
-                        \DB::table('list_products')->whereIn('id',$info['lists'])->update($update_data);
+                        \DB::table('list_products')->whereIn('id', $info['lists'])->update($update_data);
                     }
                 }
             }
@@ -487,85 +489,90 @@ class WooApi extends Base
     }
 
     // bắt đầu tạo mới sản phẩm
-    public function processCreateProduct($preData) {
+    public function processCreateProduct($preData)
+    {
         $web_scrap = $preData['web_scrap'];
         $products = $preData['products'];
         $templates = $preData['templates'];
         $template_variations = $preData['template_variations'];
 
-        \DB::beginTransaction();
-        try {
-            $woocommerce = $this->getConnectStore($templates->url, $templates->consumer_key, $templates->consumer_secret);
-            $product_success = [];
-            $product_error = [];
-            // bắt đầu tạo mới sản phẩm.
-            foreach($products as $product) {
-                try {
-                    $prod_data = [];
-                    // trả về sku
-                    $sku = ($templates->is_auto == 1) ? $templates->sku.(env('SKU_AUTO_BEGIN')+$product->count) : $templates->sku;
-                    $product_name = $this->getProductName($product->product_name, $sku, $web_scrap->exclude_text, $web_scrap->first_title);
+        // nếu tồn tại product để tạo mới
+        if (sizeof($products) > 0) {
+            \DB::beginTransaction();
+            try {
+                $woocommerce = $this->getConnectStore($templates->url, $templates->consumer_key, $templates->consumer_secret);
+                $product_success = [];
+                $product_error = [];
+                // bắt đầu tạo mới sản phẩm.
+                foreach ($products as $product) {
+                    try {
+                        $prod_data = [];
+                        // trả về sku
+                        $sku = ($templates->is_auto == 1) ? $templates->sku . (env('SKU_AUTO_BEGIN') + $product->count) : $templates->sku;
+                        $product_name = $this->getProductName($product->product_name, $sku, $web_scrap->exclude_text, $web_scrap->first_title);
 
-                    logfile_system('-- Đang tạo sản phẩm mới '.$product_name);
-                    // chuẩn bị dữ liệu data
-                    $prod_data = $this->preProductData(json_decode($templates->woo_template_source, true));
-                    // edit lại prod_data
-                    $prod_data['name'] = $product_name;
-                    $prod_data['categories'] = [
-                        ['id' => $templates->store_category_id]
-                    ];
-
-                    /*TODO :cần thêm tag product ở đây
-                        //them tag vao san pham
-                        if ($val['woo_tag_id'] != '') {
+                        logfile_system('-- Đang tạo sản phẩm mới ' . $product_name);
+                        // chuẩn bị dữ liệu data
+                        $prod_data = $this->preProductData(json_decode($templates->woo_template_source, true));
+                        // edit lại prod_data
+                        $prod_data['name'] = $product_name;
+                        $prod_data['categories'] = [
+                            ['id' => $templates->store_category_id]
+                        ];
+                        if (is_numeric($product->store_tag_id) && $product->store_tag_id > 0) {
                             $prod_data['tags'][] = [
-                                'id' => $val['woo_tag_id'],
-                                'name' => $val['tag_name'],
-                                'slug' => $val['tag_name'],
+                                'id' => $product->store_tag_id,
+                                'name' => $product->tag_name,
+                                'slug' => $product->slug
                             ];
                         }
-                    */
-                    //Kết nối với woocommerce
-                    $save_product = $woocommerce->post('products', $prod_data);
-                    $woo_product_id = $save_product->id;
+                        //Kết nối với woocommerce
+                        $save_product = $woocommerce->post('products', $prod_data);
+                        $woo_product_id = $save_product->id;
 
-                    // tạo variation của product
-                    if (sizeof($template_variations) > 0) {
-                        foreach ($template_variations as $variation) {
-                            $variation_data = $this->preVariationProductData(json_decode($variation->variation_source, true));
-                            $woocommerce->post('products/' . $woo_product_id . '/variations', $variation_data);
+                        // tạo variation của product
+                        if (sizeof($template_variations) > 0) {
+                            foreach ($template_variations as $variation) {
+                                $variation_data = $this->preVariationProductData(json_decode($variation->variation_source, true));
+                                $woocommerce->post('products/' . $woo_product_id . '/variations', $variation_data);
+                            }
                         }
+                        logfile_system('-- Tạo thành công sản phẩm ' . $product_name);
+                        $product_success[] = $product->list_product_id;
+                    } catch (\Exception $e) {
+                        logfile_system('-- [Error] Tạo sản phẩm ' . $product_name . ' thất bại');
+                        $product_error[] = $product->list_product_id;
                     }
-                    logfile_system('-- Tạo thành công sản phẩm '.$product_name);
-                    $product_success[] = $product->list_product_id;
-                } catch (\Exception $e) {
-                    logfile_system('-- [Error] Tạo sản phẩm '.$product_name.' thất bại');
-                    $product_error[] = $product->list_product_id;
                 }
+                // nếu product tạo thành công
+                if (sizeof($product_success) > 0) {
+                    logfile_system('-- Cập nhật trạng thái ' . sizeof($product_success) . ' products tạo thành công vào database');
+                    \DB::table('list_products')->whereIn('id', $product_success)->update([
+                        'status' => env('STATUS_SCRAP_PRODUCT_PROCESS'),
+                        'updated_at' => dbTime()
+                    ]);
+                }
+                // nếu product tạo thất bại
+                if (sizeof($product_error) > 0) {
+                    logfile_system('-- Cập nhật trạng thái ' . sizeof($product_success) . ' products tạo thất bại vào database');
+                    \DB::table('list_products')->whereIn('id', $product_error)->update([
+                        'status' => env('STATUS_SCRAP_PRODUCT_ERROR'),
+                        'updated_at' => dbTime()
+                    ]);
+                }
+                \DB::commit(); // if there was no errors, your query will be executed
+            } catch (\Exception $e) {
+                $message = 'Xảy ra lỗi ngoài mong muốn: ' . $e->getMessage();
+                \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
             }
-            // nếu product tạo thành công
-            if (sizeof($product_success) > 0) {
-                logfile_system('-- Cập nhật trạng thái '.sizeof($product_success).' products tạo thành công vào database');
-                \DB::table('list_products')->whereIn('id',$product_success)->update([
-                    'status' => env('STATUS_SCRAP_PRODUCT_PROCESS'),
-                    'updated_at' => dbTime()
-                ]);
-            }
-            // nếu product tạo thất bại
-            if (sizeof($product_error) > 0) {
-                logfile_system('-- Cập nhật trạng thái '.sizeof($product_success).' products tạo thất bại vào database');
-                \DB::table('list_products')->whereIn('id',$product_error)->update([
-                    'status' => env('STATUS_SCRAP_PRODUCT_ERROR'),
-                    'updated_at' => dbTime()
-                ]);
-            }
-            $result = true;
-            \DB::commit(); // if there was no errors, your query will be executed
-        } catch (\Exception $e) {
             $result = false;
-            $message = 'Xảy ra lỗi ngoài mong muốn: '.$e->getMessage();
-            \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+        } else {
+            logfile_system('Đã hết sản phẩm để tạo mới. Chuyển sang công việc khác');
+            $result = true;
         }
+        $results = [
+            'result' => $result
+        ];
         return $result;
     }
 
