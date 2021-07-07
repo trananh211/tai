@@ -529,7 +529,10 @@ class WooApi extends Base
                         //Kết nối với woocommerce
                         $save_product = $woocommerce->post('products', $prod_data);
                         $woo_product_id = $save_product->id;
-
+                        \DB::table('list_products')->where('id',$product->list_product_id)->update([
+                            'store_product_id' => $woo_product_id,
+                            'type_platform' => env('STORE_WOO_ID')
+                        ]);
                         // tạo variation của product
                         if (sizeof($template_variations) > 0) {
                             foreach ($template_variations as $variation) {
@@ -608,6 +611,149 @@ class WooApi extends Base
             'menu_order' => $variation_json['menu_order']
         ];
         return $variation_data;
+    }
+
+    // Hàm tạo ảnh product
+    public function createImageProductWoo() {
+        logfile_system('Up ảnh sản phẩm lên product.');
+        // lấy ra danh sách sản phẩm chưa up image
+        $products = \DB::table('list_products as lpd')
+            ->select(
+                'lpd.id', 'lpd.web_scrap_id', 'product_name','store_product_id'
+            )
+            ->where('lpd.type_platform', env('STORE_WOO_ID'))
+            ->where('lpd.status',env('STATUS_SCRAP_PRODUCT_PROCESS'))
+            ->limit(env('LIMIT_PRODUCT_IMAGE_IMPORT'))
+            ->get()->toArray();
+        if (sizeof($products) > 0) {
+            $list_web_scrap_id = [];
+            $list_product_id = [];
+            $list_products = [];
+            foreach ($products as $product) {
+                $list_product_id[] = $product->id;
+                $list_web_scrap_id[] = $product->web_scrap_id;
+                $list_products[$product->web_scrap_id][$product->id] = json_decode(json_encode($product), true);
+            }
+            // lấy ra danh sách website và images
+            $web_scraps = \DB::table('web_scraps as wsc')
+                ->leftjoin('templates as tmp','wsc.template_id', '=', 'tmp.id')
+                ->leftjoin('store_infos as info', 'tmp.store_info_id', '=', 'info.id')
+                ->select(
+                    'wsc.id as web_scrap_id', 'wsc.image_array', 'tmp.store_info_id',
+                    'info.url', 'info.consumer_key', 'info.consumer_secret'
+                )
+                ->whereIn('wsc.id',$list_web_scrap_id)
+                ->get()->toArray();
+            $data = [];
+            if (sizeof($web_scraps) > 0) {
+                $list_web_scraps = [];
+                foreach ($web_scraps as $info) {
+                    $image_array = (strlen($info->image_array) > 0) ? $info->image_array : '1,2,3,4';
+                    $tmp_img = explode(',', $image_array);
+                    $tmp_img = $this->getArrayTrue($tmp_img);
+                    $web_scrap_id = $info->web_scrap_id;
+                    $list_web_scraps[$web_scrap_id] = json_decode(json_encode($info), true);
+                    $list_web_scraps[$web_scrap_id]['image_sort'] = $tmp_img;
+                    if (array_key_exists($web_scrap_id, $list_products)) {
+                        $data[$web_scrap_id]['info'] = json_decode(json_encode($info), true);
+                        $data[$web_scrap_id]['data'] = $list_products[$web_scrap_id];
+                    }
+                }
+                // lấy danh sách images
+                $list_images = \DB::table('product_images as img')
+                    ->select('img.web_scrap_id', 'img.name', 'img.list_product_id', 'img.url as link', 'img.position')
+                    ->whereIn('img.list_product_id', $list_product_id)
+                    ->get()->toArray();
+                $images = [];
+                // sort image
+                foreach ($list_web_scraps as $web_scrap_id => $info) {
+                    $image_sort = $info['image_sort'];
+                    foreach ($image_sort as $position) {
+                        foreach ($list_images as $image) {
+                            if ($image->position == $position) {
+                                $images[$image->list_product_id][] = [
+                                    'src' => $image->link,
+                                    'name' => $image->name,
+                                    'alt' => $image->name
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                $list_product_success = [];
+                $list_product_error = [];
+                if (sizeof($data) > 0) {
+                    foreach ($data as $web_scrap_id => $item) {
+                        // kết nối tới woocommerce
+                        $woocommerce = $this->getConnectStore($item['info']['url'], $item['info']['consumer_key'], $item['info']['consumer_secret']);
+                        // lặp các product và up ảnh sản phẩm
+                        foreach ($item['data'] as $list_product_id => $product) {
+                            $woo_product_id = $product['store_product_id'];
+                            $woo_product_name = $product['product_name'];
+                            $data_image = (array_key_exists($list_product_id, $images)) ? $images[$list_product_id] : [];
+                            // nếu product tồn tại ảnh. thì upload.
+                            if (sizeof($data_image) > 0) {
+                                $data = [
+                                    'id' => $woo_product_id,
+                                    'status' => 'publish',
+                                    'images' => $data_image
+                                ];
+                                $result = $woocommerce->put('products/' . $woo_product_id, $data);
+                                try {
+                                    $try = true;
+                                    $result = $woocommerce->put('products/' . $woo_product_id, $data);
+                                } catch (\Exception $e) {
+                                    $try = false;
+                                }
+                                if ($try)
+                                {
+                                    $woo_slug = $result->permalink;
+//                                    \DB::table('scrap_products')->where('id',$scrap_product_id)->update(['woo_slug' => $woo_slug]);
+                                    logfile_system('-- Đã chuẩn bị thành công data image của sản phẩm ' . $woo_product_name);
+                                    $list_product_success[$list_product_id] = $list_product_id;
+                                } else {
+                                    $list_product_error[$list_product_id] = $list_product_id;
+                                    logfile_system('-- Thất bại. Không chuẩn bị được image data của sản phẩm ' . $woo_product_name);
+                                }
+
+                            } else { // nếu không tồn tại ảnh thì bỏ qua
+                                $list_product_error[$list_product_id] = $list_product_id;
+                            }
+                        }
+                    }
+
+                    if (sizeof($list_product_success) > 0) {
+                        \DB::table('list_products')->whereIn('id', $list_product_success)->update([
+                            'status' => env('STATUS_SCRAP_PRODUCT_FINISH'),
+                            'updated_at' => dbTime()
+                        ]);
+                        \DB::table('product_images')->whereIn('list_product_id', $list_product_success)->update([
+                            'status' => env('STATUS_SCRAP_PRODUCT_FINISH'),
+                            'updated_at' => dbTime()
+                        ]);
+                    }
+
+                    if (sizeof($list_product_error) > 0) {
+                        \DB::table('list_products')->whereIn('id', $list_product_error)->update([
+                            'status' => env('STATUS_SCRAP_PRODUCT_ERROR'),
+                            'updated_at' => dbTime()
+                        ]);
+                        \DB::table('product_images')->whereIn('list_product_id', $list_product_error)->update([
+                            'status' => env('STATUS_SCRAP_PRODUCT_ERROR'),
+                            'updated_at' => dbTime()
+                        ]);
+                    }
+                }
+            }
+            $result = false;
+        } else {
+            logfile_system('Đã hết product để upload Image. Chuyển sang công việc khác');
+            $result = true;
+        }
+        return [
+            'result' => $result
+        ];
     }
     /* ================================= End create product ========================================*/
 }

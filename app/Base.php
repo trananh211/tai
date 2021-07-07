@@ -53,4 +53,13 @@ class Base extends Model
         $string = preg_replace('/[^A-Za-z0-9\-]/', '', strip_tags($string)); // Removes special chars.
         return $string;
     }
+
+    // hàm lọc phần tử rỗng và khoảng trắng array
+    public function getArrayTrue($array) {
+        // loại bỏ khoảng trắng array
+        $array = array_map('trim', $array);
+        // loại bỏ phần tử rỗng array
+        $array = array_filter($array, 'strlen');
+        return $array;
+    }
 }

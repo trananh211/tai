@@ -19,6 +19,7 @@ class WooController extends Controller
         // nếu pre create có data. tiếp tục check tag
         if ($pre_create['check_tag']) {
             $WooApi->processCreateTag($pre_create);
+            return false;
         } else {
             // nếu check tag xong. Chuyển sang tạo mới sản phẩm
             if ($pre_create['result']) {
@@ -28,6 +29,11 @@ class WooController extends Controller
                 return $pre_create['result'];
             }
         }
+    }
 
+    // hàm tạo ảnh của sản phẩm woocommerce
+    public function createImageProductWoo() {
+        $WooApi = new WooApi();
+        return $WooApi->createImageProductWoo();
     }
 }

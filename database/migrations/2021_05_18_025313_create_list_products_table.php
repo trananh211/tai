@@ -18,6 +18,8 @@ class CreateListProductsTable extends Migration
 	        $table->integer('web_scrap_id')->nullable(false);
             $table->string('product_name','255');
             $table->integer('store_tag_id')->nullable(true);
+            $table->smallInteger('type_platform')->nullable(true);
+            $table->integer('store_product_id')->nullable(true);
             $table->smallInteger('status')->default(0);
             $table->text('product_link')->nullable(false);
             $table->text('img')->nullable(true);

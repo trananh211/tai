@@ -95,9 +95,11 @@
 
         $templates = \DB::table('templates as temp')
             ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
+            ->leftjoin('store_infos as info', 'temp.store_info_id', '=', 'info.id')
             ->select(
                 'temp.id','temp.name','temp.product_name','temp.type_platform',
-                'skus.sku', 'skus.is_auto as sku_auto'
+                'skus.sku', 'skus.is_auto as sku_auto',
+                'info.name as store_name'
             )
             ->orderBy('temp.type_platform')->get()->toArray();
         $data_template = '
@@ -154,12 +156,17 @@
                 $view = "Running";
                 break;
             case env('STATUS_SCRAP_PRODUCT_READY'):
-                $class = 'bg-navy';
+                $class = 'bg-warning';
                 $view = "Ready";
                 break;
             case env('STATUS_SCRAP_PRODUCT_PROCESS'):
-                $class = 'bg-success';
+                $class = 'bg-orange';
                 $view = "Process";
+                break;
+
+            case env('STATUS_SCRAP_PRODUCT_FINISH'):
+                $class = 'bg-success';
+                $view = "Finish";
                 break;
         }
         echo '<div class="color-palette-set">
