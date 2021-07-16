@@ -45,7 +45,13 @@
                                             <label>Select Template (Bắt Buộc)</label>
                                             <select name="template_id" class="form-control" required>
                                                 <option value="0">Chọn Template</option>
-                                                @foreach( $templates as $template_id => $template_name)
+                                                @foreach( $templates as $key => $item)
+                                                    <?php
+                                                    $template_id = $item->id;
+                                                    $shop = (array_key_exists($item->type_platform, $platforms)) ? $platforms[$item->type_platform].' : '.$item->store_name : '';
+                                                    $sku = ($item->sku_auto == 1) ? $item->sku.'++' : $item->sku;
+                                                    $template_name = $shop.' - '.$item->name.' - '.$item->product_name.' '.$sku;
+                                                    ?>
                                                     <option {{ ($ss_scrap && $template_id == $ss_scrap['template_id']) ? 'selected' : ''}}
                                                             value="{{ $template_id }}"> {{ $template_name }}
                                                     </option>
@@ -82,6 +88,37 @@
                                         <label>Loại ảnh</label>
                                         <input value="{{ ($ss_scrap) ? $ss_scrap['exclude_image'] : ''}}"
                                                type="text" class="form-control" name="exclude_image" placeholder="VD: link1, link2" >
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <!-- select -->
+                                        <div class="form-group">
+                                            <label>Kiểu Tag Sản Phẩm</label>
+                                            <select name="type_tag" class="form-control" required>
+                                                <option value="0">Chọn kiểu</option>
+                                                @foreach( $typeTag as $typeTag_id => $typeTag_name)
+                                                    <option {{ ($ss_scrap && $typeTag_id == $ss_scrap['type_tag']) ? 'selected' : ''}}
+                                                            value="{{ $typeTag_id }}">{{ $typeTag_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label>Tag cố định</label>
+                                            <input value="{{ ($ss_scrap) ? $ss_scrap['tag_text'] : ''}}"
+                                                   type="text" class="form-control" name="tag_text"
+                                                   placeholder="VD: Manchester United">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Vị trí tag</label><smale>Vị trí thứ X trong title</smale>
+                                            <input value="{{ ($ss_scrap) ? $ss_scrap['tag_position'] : ''}}"
+                                                   type="number" class="form-control" name="tag_position"
+                                                   placeholder="VD: 123">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use \DB;
 
 class Scrap extends Model
 {
@@ -46,6 +47,7 @@ class Scrap extends Model
                 $web_scrap_id = $bodyContent['web_scrap_id'];
                 // lấy ra toàn bộ url của website này đã từng crawl trước đó để so sánh với dữ liệu được trả về
                 $lists = \DB::table('list_products')->where('web_scrap_id', $web_scrap_id)->pluck('product_link')->toArray();
+                $count = sizeof($lists) + 1;
                 foreach ($lstProducts as $item) {
                     $link = trim($item['link']);
                     if (in_array($link, $lists)) {
@@ -56,9 +58,11 @@ class Scrap extends Model
                         'product_name' => trim($item['title']),
                         'product_link' => $link,
                         'img' => trim($item['img']),
+                        'count' => $count,
                         'created_at' => dbTime(),
                         'updated_at' => dbTime()
                     ];
+                    $count++;
                     $data[] = $tmp;
                 }
                 if (sizeof($data) > 0) {
@@ -326,7 +330,7 @@ class Scrap extends Model
                     if (sizeof($list_web_scraps_done) > 0) {
                         \DB::table('web_scraps')->whereIn('id', $list_web_scraps_done)
                             ->update([
-                                'status' => env('STATUS_SCRAP_PRODUCT_SUCCESS'),
+                                'status' => env('STATUS_SCRAP_PRODUCT_PROCESS'),
                                 'updated_at' => dbTime()
                             ]);
                     }

@@ -8,12 +8,16 @@
         \DB::beginTransaction();
         try {
 
+            $result = true;
             \DB::commit(); // if there was no errors, your query will be executed
         } catch (\Exception $e) {
 
+            $result = false;
             $message = 'Xảy ra lỗi ngoài mong muốn: '.$e->getMessage();
             \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
         }
+        $i = 'json_data';
+        $i = json_decode(json_encode($i ,true),true);
     }
 
     function logfile($str){
@@ -22,9 +26,9 @@
     }
 
     function logfile_system($str){
-        $str .= "\n";
+//        $str .= "\n";
         \Log::channel('custom')->info($str);
-        echo $str."\n";
+//        echo $str."\n";
     }
 
     function dbTime()
@@ -51,6 +55,10 @@
         $class = '';
         $view = '';
         switch ($value) {
+            case env('STORE_DEFAUTL_ID'):
+                $class = 'bg-orange';
+                $view = "UP TAY";
+                break;
             case env('STORE_WOO_ID'):
                 $class = 'bg-purple';
                 $view = "WooCommerce";
@@ -69,18 +77,31 @@
     function dataDefine()
     {
         $platforms = [
-            env('PLATFORM_SHOPBASE_ID') => 'SHOP BASE',
-            env('PLATFORM_WOOCOMMERCE_ID') => 'WOOCOMMERCE SHOP'
+            env('STORE_SHOPBASE_ID') => 'SHOP BASE',
+            env('STORE_WOO_ID') => 'WOOCOMMERCE'
         ];
         $typePageLoad = [
             env('PAGE_LOAD_BUTTON') => 'KIỂU NÚT BẤM',
             env('PAGE_LOAD_SCROLL') => 'KIỂU CUỘN TRANG',
             env('PAGE_LOAD_ONE_PAGE') => 'CHỈ MỘT TRANG'
         ];
-        $templates = [
-            '1' => 'Shopbase - Tshirt',
-            '2' => 'Shopbase - LowTop',
+
+        $typeTag = [
+            env('TYPE_TAG_FIXED') => 'Đặt cố định 1 Tag',
+            env('TYPE_TAG_FIRST_TITLE') => 'Lấy ký tự đầu của Title',
+            env('TYPE_TAG_LAST_TITLE') => 'Lấy ký tự cuối của Title',
+            env('TYPE_TAG_POSITION_X') => 'Ký tự thứ X của Title',
         ];
+
+        $templates = \DB::table('templates as temp')
+            ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
+            ->leftjoin('store_infos as info', 'temp.store_info_id', '=', 'info.id')
+            ->select(
+                'temp.id','temp.name','temp.product_name','temp.type_platform',
+                'skus.sku', 'skus.is_auto as sku_auto',
+                'info.name as store_name'
+            )
+            ->orderBy('temp.type_platform')->get()->toArray();
         $data_template = '
             {
                 "url": "https://vetz3d.com/shop?startId=6036571b4dd66d935ec5e512", // Địa chỉ website cần crawl
@@ -108,6 +129,7 @@
         $results = [
             'platforms' => $platforms,
             'typePageLoad' => $typePageLoad,
+            'typeTag' => $typeTag,
             'templates' => $templates,
             'data_template' => $data_template,
             'product_template' => $product_template,
@@ -134,12 +156,17 @@
                 $view = "Running";
                 break;
             case env('STATUS_SCRAP_PRODUCT_READY'):
-                $class = 'bg-navy';
+                $class = 'bg-warning';
                 $view = "Ready";
                 break;
-            case env('STATUS_SCRAP_PRODUCT_SUCCESS'):
+            case env('STATUS_SCRAP_PRODUCT_PROCESS'):
+                $class = 'bg-orange';
+                $view = "Process";
+                break;
+
+            case env('STATUS_SCRAP_PRODUCT_FINISH'):
                 $class = 'bg-success';
-                $view = "Success";
+                $view = "Finish";
                 break;
         }
         echo '<div class="color-palette-set">
