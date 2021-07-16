@@ -16,3 +16,8 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/list-product/','ScraperController@getListProduct');
+Route::post('/list-product-images/','ScraperController@getListProductImages');
+Route::post('/get-product-data/','ScraperController@getProductData');
+Route::get('/test-product/','ScraperController@scrapProduct');

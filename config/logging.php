@@ -40,6 +40,12 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        'custom' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/custom_logs.log'),
+            'level' => 'info'
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),

@@ -14,3 +14,33 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/', function () {
+    return view('welcome');
+})->middleware('auth');
+
+Auth::routes();
+
+Route::get('/home', 'UserController@index')->name('home');
+
+/*Only member*/
+Route::group(['middleware' => ['member']], function () {
+    // verify data scrap
+    Route::get('/view-scraper', 'AdminController@viewScraper');
+    Route::post('/post-data-scrap-setup', 'AdminController@dataScrapSetup');
+    Route::post('/save-data-scrap-setup', 'AdminController@saveDataScrapSetup');
+    Route::get('/list-scraper', 'AdminController@getListScraper');
+
+    // Connect Store, edit store
+    Route::get('/list-stores', 'AdminController@listStore');
+    Route::get('/new-template/{id}', 'AdminController@newTemplate');
+    Route::post('/check-woo-template', 'WooController@checkTemplate');
+    Route::get('/list-templates', 'AdminController@listTemplate');
+    Route::get('/connect-woo', 'AdminController@connectWoo');
+    Route::post('/get-woo-info', 'AdminController@getWooInfo');
+    Route::get('/delete-template/{id}', 'AdminController@deleteTemplate');
+    Route::get('/delete-web-scrap/{id}', 'AdminController@deleteWebScrap');
+});
+
+
+
