@@ -38,6 +38,8 @@ Route::group(['middleware' => ['member']], function () {
     Route::get('/list-templates', 'AdminController@listTemplate');
     Route::get('/connect-woo', 'AdminController@connectWoo');
     Route::post('/get-woo-info', 'AdminController@getWooInfo');
+    Route::get('/delete-template/{id}', 'AdminController@deleteTemplate');
+    Route::get('/delete-web-scrap/{id}', 'AdminController@deleteWebScrap');
 });
 
 

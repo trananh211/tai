@@ -91,6 +91,7 @@ class Admin extends User
         }
         $catalog_source = json_decode($data['catalog_source'], true);
         $product_source = json_decode($data['product_source'], true);
+
         $verify_data = [
             'catalog_source' => $catalog_source,
             'product_source' => $product_source
@@ -179,6 +180,7 @@ class Admin extends User
         $catalog_source = json_decode($data['catalog_source'], true);
         $product_source = json_decode($data['product_source'], true);
 
+        $data['tag_position'] = ($data['tag_position'] != null) ? $data['tag_position'] : 0;
         $data['type_platform'] = $type_platform_id;
         $data['url'] = $catalog_source['url'];
         $data['catalog_source'] = json_encode($catalog_source);
@@ -205,5 +207,54 @@ class Admin extends User
             'alert' => $alert,
             'message' => $message
         ];
+    }
+
+    // xoá template
+    public function deleteTemplate($id) {
+        $check = \DB::table('web_scraps')->select('id')->where('template_id',$id)->count();
+        if ($check > 0) {
+            $alert = 'error';
+            $message = 'Không thể xoá Template này. Vẫn còn website scrap sử dụng template này. Cần xoá website scrap trước';
+        } else {
+            \DB::beginTransaction();
+            try {
+                $alert = 'success';
+                \DB::table('template_variations')->where('template_id',$id)->delete();
+                \DB::table('templates')->where('id',$id)->delete();
+                $result = true;
+                $message = 'Xoá thành công template';
+                \DB::commit(); // if there was no errors, your query will be executed
+            } catch (\Exception $e) {
+                $alert = 'warning';
+                $result = false;
+                $message = 'Không thể xoá template này. Xảy ra lỗi ngoài mong muốn: '.$e->getMessage();
+                \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+            }
+        }
+        return back()->with($alert, $message);
+    }
+
+    // xoá scrap web
+    public function deleteWebScrap($id) {
+        $check = \DB::table('list_products')->select('id')->where('web_scrap_id',$id)->count();
+        if ($check > 0) {
+            $alert = 'error';
+            $message = 'Không thể xoá website scrap này. Vẫn còn product thuộc website này. Cần xoá product trước';
+        } else {
+            \DB::beginTransaction();
+            try {
+                $alert = 'success';
+                \DB::table('web_scraps')->where('id',$id)->delete();
+                $result = true;
+                $message = 'Xoá thành công website scrap';
+                \DB::commit(); // if there was no errors, your query will be executed
+            } catch (\Exception $e) {
+                $alert = 'warning';
+                $result = false;
+                $message = 'Không thể xoá website scrap này. Xảy ra lỗi ngoài mong muốn: '.$e->getMessage();
+                \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+            }
+        }
+        return back()->with($alert, $message);
     }
 }

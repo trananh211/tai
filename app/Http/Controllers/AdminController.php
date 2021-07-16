@@ -52,9 +52,10 @@ class AdminController extends Controller
     {
         $templates = \DB::table('templates as t')
             ->leftjoin('store_infos as s','s.id', '=', 't.store_info_id')
+            ->leftjoin('skus','t.sku_id', '=', 'skus.id')
             ->select(
                 't.id', 't.name','t.product_name', 't.type_platform','t.status',
-                's.name as store_name'
+                's.name as store_name', 'skus.sku', 'skus.is_auto as sku_auto'
             )
             ->orderBy('id','DESC')
             ->orderBy('store_info_id')
@@ -146,10 +147,30 @@ class AdminController extends Controller
 
     // list thông tin các danh sách website scraper
     public function getListScraper() {
-        $lists = \DB::table('web_scraps')
-            ->select('id', 'url', 'template_id', 'status')
-            ->orderBy('template_id')
+        $lists = \DB::table('web_scraps as wsc')
+            ->leftjoin('templates as temp', 'wsc.template_id', '=', 'temp.id')
+            ->leftjoin('skus', 'skus.id', '=', 'temp.sku_id')
+            ->leftjoin('store_infos', 'temp.store_info_id', '=', 'store_infos.id')
+            ->select(
+                'wsc.id', 'wsc.url', 'wsc.template_id', 'wsc.status',
+                'temp.name as template_name', 'temp.type_platform',
+                'skus.sku', 'skus.is_auto as sku_auto',
+                'store_infos.name as store_name'
+            )
+            ->orderBy('wsc.id','DESC')
+            ->orderBy('wsc.template_id','ASC')
             ->get()->toArray();
         return view('user.list_scraper')->with(compact('lists'));
+    }
+
+    // xoá template
+    public function deleteTemplate($id) {
+        $adminModel = new Admin();
+        return $adminModel->deleteTemplate($id);
+    }
+    // xoá scrap web
+    public function deleteWebScrap($id) {
+        $adminModel = new Admin();
+        return $adminModel->deleteWebScrap($id);
     }
 }

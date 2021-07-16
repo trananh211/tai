@@ -30,7 +30,10 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Template</th>
+                                    <th>Sku</th>
+                                    <th>Store</th>
                                     <th>Url</th>
+                                    <th>Platform</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -40,17 +43,25 @@
                                     @foreach ($lists as $key => $item)
                                         <tr>
                                             <td>{{ ++$key }}</td>
-                                            <td>{{ $item->template_id }}</td>
+                                            <td>{{ $item->template_name }}</td>
+                                            <td>{{ ($item->sku_auto == 1) ? $item->sku.'++' : $item->sku }}</td>
+                                            <td>{{ $item->store_name }}</td>
                                             <td>{{ $item->url }}</td>
+                                            <td> {!! getTypeStore($item->type_platform) !!}</td>
                                             <td>{!! getStatus($item->status) !!}</td>
                                             <td>
-                                                Edit | Delete
+                                                Edit |
+                                                <a href="{{ url('delete-web-scrap/'.$item->id) }}"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa toàn bộ website scrap này?');"
+                                                >
+                                                    <button type="button" class="btn btn-xs btn-block btn-danger">Delete</button>
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr >
-                                        <td colspan="5">Không có data . Tạo mới ở <a href="{{ url('view-scraper') }}">đây</a></td>
+                                        <td colspan="8">Không có data . Tạo mới ở <a href="{{ url('view-scraper') }}">đây</a></td>
                                     </tr>
                                 @endif
                                 </tbody>

@@ -30,6 +30,7 @@ $breadcrumb = [
                                     <th>#</th>
                                     <th>Name</th>
                                     <th>Product Name</th>
+                                    <th>SKU</th>
                                     <th>Type</th>
                                     <th>Store</th>
                                     <th>Status</th>
@@ -43,17 +44,23 @@ $breadcrumb = [
                                             <td>{{ ++$key }}</td>
                                             <td>{{ $item->name }}</td>
                                             <td>{{ $item->product_name }}</td>
+                                            <td>{{ ($item->sku_auto == 1) ? $item->sku.'++' : $item->sku }}</td>
                                             <td>{!! getTypeStore($item->type_platform) !!}</td>
                                             <td>{{ $item->store_name}}</td>
                                             <td>{!! getStatus($item->status) !!}</td>
                                             <td>
-                                                Edit | Delete
+                                                Edit |
+                                                <a href="{{ url('delete-template/'.$item->id) }}"
+                                                   onclick="return confirm('Bạn có chắc chắn muốn xóa Template này?');"
+                                                >
+                                                    <button type="button" class="btn btn-xs btn-block btn-danger">Delete</button>
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
                                 @else
                                     <tr >
-                                        <td colspan="5">Không có data . Tạo mới ở <a href="{{ url('view-scraper') }}">đây</a></td>
+                                        <td colspan="8">Không có data . Cần được Tạo mới</td>
                                     </tr>
                                 @endif
                                 </tbody>

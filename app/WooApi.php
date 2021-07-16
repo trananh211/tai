@@ -421,18 +421,37 @@ class WooApi extends Base
                             $data = [
                                 'name' => $tag_name
                             ];
-                            $i = $woocommerce->post('products/tags', $data);
-                            $store_tags_data = [
-                                'name' => $i->name,
-                                'slug' => $i->slug,
-                                'type_platform' => env('STORE_WOO_ID'),
-                                'store_tag_id' => $i->id,
-                                'store_info_id' => $templates->store_info_id,
-                                'created_at' => dbTime(),
-                                'updated_at' => dbTime()
-                            ];
-                            $store_tag_name = $i->name;
-                            $store_tag_slug = $i->slug;
+                            try {
+                                $i = $woocommerce->post('products/tags', $data);
+                                $store_tags_data = [
+                                    'name' => $i->name,
+                                    'slug' => $i->slug,
+                                    'type_platform' => env('STORE_WOO_ID'),
+                                    'store_tag_id' => $i->id,
+                                    'store_info_id' => $templates->store_info_id,
+                                    'created_at' => dbTime(),
+                                    'updated_at' => dbTime()
+                                ];
+                                $store_tag_name = $i->name;
+                                $store_tag_slug = $i->slug;
+                            } catch (\Exception $e) {
+                                $data = [
+                                    'name' => 'null'
+                                ];
+                                $result = $woocommerce->get('products/tags', $data);
+                                $store_tags_data = [
+                                    'name' => $result[0]->name,
+                                    'slug' => $result[0]->slug,
+                                    'type_platform' => env('STORE_WOO_ID'),
+                                    'store_tag_id' => $result[0]->id,
+                                    'store_info_id' => $templates->store_info_id,
+                                    'created_at' => dbTime(),
+                                    'updated_at' => dbTime()
+                                ];
+                                $store_tag_name = $result[0]->name;
+                                $store_tag_slug = $result[0]->slug;
+                            }
+
                         } else { // nếu thấy thông tin thì lấy dữ liệu và lưu về database
                             logfile_system('- Đã tồn tại thông tin tag : ' . $tag_name . '. Tạo mới và lưu vào database');
                             $store_tags_data = [

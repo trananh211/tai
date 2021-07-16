@@ -28,7 +28,7 @@
     function logfile_system($str){
 //        $str .= "\n";
         \Log::channel('custom')->info($str);
-        echo $str."\n";
+//        echo $str."\n";
     }
 
     function dbTime()

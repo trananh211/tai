@@ -23,7 +23,7 @@ class AddNewWebScraps extends Migration
             $table->string('first_title')->nullable(true);
             $table->smallInteger('type_tag')->default(0);
             $table->string('tag_text',50)->nullable(true);
-            $table->smallInteger('tag_position')->default(0);
+            $table->smallInteger('tag_position')->nullable(true)->default(0);
             $table->tinyInteger('status')->default(0);
             $table->text('url')->nullable(false);
             $table->text('catalog_source')->nullable(false);
