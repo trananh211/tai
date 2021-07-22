@@ -51,7 +51,7 @@ $breadcrumb = [
                                     @endforeach
                                 @else
                                     <tr >
-                                        <td colspan="5">Không có data . Tạo mới ở <a href="{{ url('view-scraper') }}">đây</a></td>
+                                        <td colspan="6">Không có data . Cần được tạo mới</td>
                                     </tr>
                                 @endif
                                 </tbody>
