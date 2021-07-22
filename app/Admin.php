@@ -13,7 +13,7 @@ class Admin extends User
     {
         $data = $request->all();
         unset($data['_token']);
-        $data['type'] = stores('woo');
+        $data['type'] = env('STORE_WOO_ID');
         $data['created_at'] = dbTime();
         $data['updated_at'] = dbTime();
         \DB::beginTransaction();
