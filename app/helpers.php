@@ -28,7 +28,7 @@
     function logfile_system($str){
 //        $str .= "\n";
         \Log::channel('custom')->info($str);
-//        echo $str."\n";
+        echo $str."\n";
     }
 
     function dbTime()
@@ -108,6 +108,9 @@
                 "waitSelector": "div.ShopPage", // Dấu hiệu nhận biết khi trang load xong ( Có thể có hoặc không )
                 "productItem": "div.ShopPage div.ProductItem", // Thuộc tính cha của product và có lặp lại với mỗi sản phẩm
                 "productTitle": "div.BottomProduct > div.Title", // Dấu hiệu nhận biết title của sản phẩm
+                "imageSelector": "img.product_card__image",
+                "imageAttribute": "data-fallback",
+                "imageHttps": "https:",
                 "productLink": "a", // Dấu hiệu nhận biết thẻ Link của sản phẩm. Thường là "<a>", "<span>", "<div>"  
                 "https_origin": "https://vetz3d.com", // Để trống hoặc chỉ điền khi link sản phẩm thiếu phần đầu website
                 "btnNext": "button.ml-2", // Dấu hiệu nhận biết Nút bấm next trang (Để trống nếu kiểu là cuộn trang)
@@ -122,7 +125,8 @@
             {
                 "productTitle": ".ProductMain .ProductTitle h1", // Title của trang sản phẩm
                 "imageSelector": "#main-preview .ProductImage img.img-fluid", // Dấu hiệu nhận biết list Ảnh của trang sản phẩm
-                "imageAttribute" : "src" // Thuộc tính của ảnh. có thể là src, href, span, title
+                "imageAttribute" : "src", // Thuộc tính của ảnh. có thể là src, href, span, title
+                "https_origin": "https:"
             }
         ';
 

@@ -595,7 +595,7 @@ class WooApi extends Base
         $results = [
             'result' => $result
         ];
-        return $result;
+        return $results;
     }
 
     private function preProductData($json)
