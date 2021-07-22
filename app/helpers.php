@@ -47,7 +47,7 @@
             'woo' => env('STORE_WOO_ID'),
             'shop_base' => env('STORE_SHOPBASE_ID')
         ];
-        return (array_key_exists($key, $stores)) ? $stores['woo'] : 0;
+        return (array_key_exists($key, $stores)) ? $stores[$key] : 0;
     }
 
     function getTypeStore($value)
