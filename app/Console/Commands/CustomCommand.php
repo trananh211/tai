@@ -23,8 +23,8 @@ class CustomCommand extends BaseCommand
      */
     protected $description = 'Command description';
 
-//    protected $array_minute = [ 57, 7, 4, 1];
-    protected $array_minute = [1];
+    protected $array_minute = [ 57, 7, 4, 1];
+//    protected $array_minute = [1];
 
     /**
      * Create a new command instance.
@@ -63,7 +63,7 @@ class CustomCommand extends BaseCommand
     {
         switch ($minute) {
             case 1:
-                $this->run1MinuteTest();
+                $this->run1Minute();
                 break;
             case 4:
                 $this->run4Minute();
@@ -89,7 +89,6 @@ class CustomCommand extends BaseCommand
 
     protected function run1MinuteTest()
     {
-//        $check0 = $this->sendDataClawer();
         $check0 = $this->test1();
     }
 
@@ -123,26 +122,6 @@ class CustomCommand extends BaseCommand
     {
         $scraper_controller = new ScraperController();
         $check = $scraper_controller->getWebScrap(); // bắt đầu cào từ web để lấy product list
-    }
-
-    /*Send data to server clawer*/
-    private function sendDataClawer()
-    {
-        $scraper_controller = new ScraperController(); // make sure to import the controller
-        $data = $scraper_controller->scrapProduct();
-        if ($data['return'] == 1)
-        {
-            $result = $this->goUrl($data);
-            $save_data = [
-                'result' => $result,
-                'data' => $data
-            ];
-            $return = $scraper_controller->saveProductRunning($save_data);
-        } else {
-            $return = 1;
-        }
-        logfile_system($data['message']);
-        return $return;
     }
 
     private function test1()
