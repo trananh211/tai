@@ -50,7 +50,11 @@
                                             <td> {!! getTypeStore($item->type_platform) !!}</td>
                                             <td>{!! getStatus($item->status) !!}</td>
                                             <td>
-                                                Edit |
+
+                                                <a href="{{ url('import-product-web-scrap/'.$item->id) }}">
+                                                    <button type="button" class="btn btn-xs btn-block btn-info">Import Handle</button>
+                                                </a>
+                                                | Edit |
                                                 <a href="{{ url('delete-web-scrap/'.$item->id) }}"
                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa toàn bộ website scrap này?');"
                                                 >

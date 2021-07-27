@@ -21,7 +21,8 @@ class WooApi extends Base
                 'version' => 'wc/v3',
                 'timeout' => 400,
                 'query_string_auth' => true,
-                'verify_ssl' => false
+                'verify_ssl' => false,
+                'query_string_auth' => true // Force Basic Authentication as query string true and using under HTTPS
             ]
         );
         return $woocommerce;

@@ -173,4 +173,27 @@ class AdminController extends Controller
         $adminModel = new Admin();
         return $adminModel->deleteWebScrap($id);
     }
+
+    // lưu sản phẩm được thêm bằng tay vào data base
+    public function saveDataByHandle(Request $request) {
+        $adminModel = new Admin();
+        return $adminModel->saveDataByHandle($request);
+    }
+
+    // thêm sản phẩm bằng tay
+    public function importProductWebScrap($id) {
+        $info = \DB::table('web_scraps as wsc')
+            ->leftjoin('templates as temp', 'wsc.template_id', '=', 'temp.id')
+            ->leftjoin('skus', 'skus.id', '=', 'temp.sku_id')
+            ->leftjoin('store_infos', 'temp.store_info_id', '=', 'store_infos.id')
+            ->select(
+                'wsc.id', 'wsc.url', 'wsc.template_id', 'wsc.status',
+                'temp.name as template_name', 'temp.type_platform',
+                'skus.sku', 'skus.is_auto as sku_auto',
+                'store_infos.name as store_name'
+            )
+            ->where('wsc.id', $id)
+            ->first();
+        return view('user.import_product_by_handle', compact('info','id'));
+    }
 }

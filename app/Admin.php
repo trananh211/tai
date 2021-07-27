@@ -257,4 +257,59 @@ class Admin extends User
         }
         return back()->with($alert, $message);
     }
+
+    // thêm sản phẩm bằng tay
+    public function saveDataByHandle($request) {
+        $data = $request->all();
+        $alert = 'error';
+        $message = 'Không lưu dữ liệu được vào database. ';
+
+        unset($data['_token']);
+        echo "<pre>";
+        print_r($data);
+        // lấy ra danh sách sản phẩm đã tồn tại cũ của web scrap id
+        $list_exist = \DB::table('list_products')
+            ->where('web_scrap_id', $data['web_scrap_id'])
+            ->pluck('product_link')
+            ->toArray();
+        $list_news = explode("\n",trim($data['list_products']));
+        print_r($list_exist);
+        print_r($list_news);
+        $new_data = [];
+        $count = \DB::table('list_products')->select('id')
+            ->where('web_scrap_id', $data['web_scrap_id'])
+            ->count();
+        if (sizeof($list_news) > 0) {
+            foreach ($list_news as $url) {
+                if (!in_array($url, $list_exist)) {
+                    $count++;
+                   $new_data[] = [
+                       'web_scrap_id' => $data['web_scrap_id'],
+                       'product_name' => $url,
+                       'type_platform' => $data['type_platform'],
+                       'status' => 0,
+                       'product_link' => $url,
+                       'img' => null,
+                        'count' => $count,
+                       'created_at' => dbTime(),
+                       'updated_at' => dbTime()
+                   ];
+
+                }
+            }
+            if (sizeof($new_data) > 0) {
+                $result = \DB::table('list_products')->insert($new_data);
+                if ($result) {
+                    $alert = 'success';
+                    $message = 'Thêm thành công';
+                } else {
+                    $message = 'Thêm thất bại';
+                }
+            }
+        } else {
+            $message = 'List danh sách bị lỗi. kiểm tra lại';
+        }
+        return back()->with($alert, $message);
+
+    }
 }
