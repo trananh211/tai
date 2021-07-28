@@ -17,6 +17,7 @@ class AddNewWebScraps extends Migration
             $table->bigIncrements('id');
             $table->integer('template_id')->nullable(false);
             $table->smallInteger('type_platform')->default(0);
+            $table->integer('sku_id')->default(0);
             $table->string('exclude_text',255)->nullable(true);
             $table->string('image_array',30)->nullable(true);
             $table->text('exclude_image')->nullable(true);

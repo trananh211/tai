@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Session;
 use \DB;
 
-class Admin extends User
+class Admin extends Base
 {
     // connect + setup store
     public function getWooInfo($request)
@@ -84,6 +84,7 @@ class Admin extends User
     public function verifydataScrapSetup($request)
     {
         $data = $request->all();
+
         unset($data['_token']);
         if (is_array($data))
         {
@@ -91,6 +92,9 @@ class Admin extends User
         }
         $catalog_source = json_decode($data['catalog_source'], true);
         $product_source = json_decode($data['product_source'], true);
+
+        $sku = trim($data['sku']);
+        $sku_auto_string = trim($data['sku_auto']);
 
         $verify_data = [
             'catalog_source' => $catalog_source,
@@ -102,38 +106,51 @@ class Admin extends User
         $message = '';
         $return = 0;
         if ($data['template_id'] != 0 && $data['type_page_load'] != 0 && $data['catalog_source'] != null &&
-            $data['product_source'] != null && $data['type_tag'] != 0) {
-            // kiểm tra tag trước
-            if ($data['type_tag'] == env('TYPE_TAG_FIXED') && $data['tag_text'] == '') {
-                $message = 'Khi chọn cố định 1 tag duy nhất. Bạn phải điền Tag cố định. Mời bạn thử lại';
-            } else if ($data['type_tag'] == env('TYPE_TAG_POSITION_X') && ($data['tag_position'] == '' || !is_numeric($data['tag_position']))) {
-                $message = 'Khi chọn tag theo vị trí của title. Bạn cần khai báo Vị trí tag và yêu cầu điền bằng số';
+            $data['product_source'] != null && $data['type_tag'] != 0 && ($sku != null || $sku_auto_string != null)) {
+            // kiểm tra tồn tại sku chưa
+            if ($sku != null) {
+                $sku_auto = 0;
+                $string_sku = trim($sku);
             } else {
-                if (is_array($catalog_source) && is_array($product_source))
-                {
-                    $template_id = $data['template_id'];
-                    $url = $catalog_source['url'];
-                    $data['url'] = $url;
-                    $check_exist = \DB::table('web_scraps')->select('id')
-                        ->where(['template_id' => $template_id, 'url' => $url])->first();
-                    // nếu đã tồn tại link đã scrap trước đó.
-                    if ($check_exist != NULL)
-                    {
-                        $alert = 'warning';
-                        $message = 'Không thể thực hiện vì bạn đã yêu cầu Crawl websilte : '.$url.' trước đó rồi.';
-                    } else {
-                        $catalog_source['typePageLoad'] = $data['type_page_load'];
-                        $data['catalog_source'] = json_encode($catalog_source);
-                        $data['product_source'] = json_encode($product_source);
-                        $return = 1;
-                        $alert = 'success';
-                        $message = 'Toàn bộ data được pass đúng định dạng.';
-                    }
+                $sku_auto = 1;
+                $string_sku = trim($sku_auto_string);
+            }
+            $check_sku_exist = $this->checkExistSku($string_sku);
+            if ($check_sku_exist) {
+                $message = 'SKU : "' . $string_sku . '" đã tồn tại. Mời bạn chọn SKU khác';
+            } else {
+                // kiểm tra tag trước
+                if ($data['type_tag'] == env('TYPE_TAG_FIXED') && $data['tag_text'] == '') {
+                    $message = 'Khi chọn cố định 1 tag duy nhất. Bạn phải điền Tag cố định. Mời bạn thử lại';
+                } else if ($data['type_tag'] == env('TYPE_TAG_POSITION_X') && ($data['tag_position'] == '' || !is_numeric($data['tag_position']))) {
+                    $message = 'Khi chọn tag theo vị trí của title. Bạn cần khai báo Vị trí tag và yêu cầu điền bằng số';
                 } else {
-                    if (!is_array($catalog_source)) {
-                        $message = 'Sai định dạng Catalog Source. Bạn cần điền lại cho đúng định dạng.';
-                    } else if (!is_array($product_source)) {
-                        $message = 'Sai định dạng Product Source. Bạn cần điền lại cho đúng định dạng.';
+                    if (is_array($catalog_source) && is_array($product_source))
+                    {
+                        $template_id = $data['template_id'];
+                        $url = $catalog_source['url'];
+                        $data['url'] = $url;
+                        $check_exist = \DB::table('web_scraps')->select('id')
+                            ->where(['template_id' => $template_id, 'url' => $url])->first();
+                        // nếu đã tồn tại link đã scrap trước đó.
+                        if ($check_exist != NULL)
+                        {
+                            $alert = 'warning';
+                            $message = 'Không thể thực hiện vì bạn đã yêu cầu Crawl websilte : '.$url.' trước đó rồi.';
+                        } else {
+                            $catalog_source['typePageLoad'] = $data['type_page_load'];
+                            $data['catalog_source'] = json_encode($catalog_source);
+                            $data['product_source'] = json_encode($product_source);
+                            $return = 1;
+                            $alert = 'success';
+                            $message = 'Toàn bộ data được pass đúng định dạng.';
+                        }
+                    } else {
+                        if (!is_array($catalog_source)) {
+                            $message = 'Sai định dạng Catalog Source. Bạn cần điền lại cho đúng định dạng.';
+                        } else if (!is_array($product_source)) {
+                            $message = 'Sai định dạng Product Source. Bạn cần điền lại cho đúng định dạng.';
+                        }
                     }
                 }
             }
@@ -143,6 +160,8 @@ class Admin extends User
                 $message = 'Bạn phải chọn Template';
             } else if ($data['type_page_load'] == 0) {
                 $message = 'Bạn phải chọn kiểu tải trang';
+            } else if ($sku == '' && $sku_auto_string == '') {
+                $message = 'Bạn phải chọn 1 trong 2 trường SKU hoặc SKU AUTO';
             } else if ($data['type_tag'] == 0) {
                 $message = 'Bạn phải chọn kiểu khai báo Tag cho sản phẩm';
             } else if ($data['catalog_source'] == null) {
@@ -159,6 +178,7 @@ class Admin extends User
             'data' => $data,
             'verify_data' => $verify_data
         ];
+
         return $result;
     }
 
@@ -170,8 +190,19 @@ class Admin extends User
         $alert = 'error';
         $message = 'Không lưu dữ liệu được vào database. ';
 
+        // kiểm tra tồn tại sku chưa
+        if ($data['sku'] != null) {
+            $sku_auto = 0;
+            $string_sku = trim($data['sku']);
+        } else {
+            $sku_auto = 1;
+            $string_sku = trim($data['sku_auto']);
+        }
+
         unset($data['_token']);
         unset($data['type_page_load']);
+        unset($data['sku']);
+        unset($data['sku_auto']);
 
         // lấy ra kiểu platform đang scrap
         $type = \DB::table('templates')->select('type_platform')->where('id',$data['template_id'])->first();
@@ -190,6 +221,9 @@ class Admin extends User
 
         \DB::beginTransaction();
         try {
+            // lấy ra Sku ID
+            $sku_id = $this->getSkuAutoId($string_sku, $sku_auto);
+            $data['sku_id'] = $sku_id;
             $r = \DB::table('web_scraps')->insert($data);
             if ($r) {
                 $result = true;

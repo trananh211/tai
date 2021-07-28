@@ -52,10 +52,9 @@ class AdminController extends Controller
     {
         $templates = \DB::table('templates as t')
             ->leftjoin('store_infos as s','s.id', '=', 't.store_info_id')
-            ->leftjoin('skus','t.sku_id', '=', 'skus.id')
             ->select(
                 't.id', 't.name','t.product_name', 't.type_platform','t.status',
-                's.name as store_name', 'skus.sku', 'skus.is_auto as sku_auto'
+                's.name as store_name'
             )
             ->orderBy('id','DESC')
             ->orderBy('store_info_id')
@@ -149,7 +148,7 @@ class AdminController extends Controller
     public function getListScraper() {
         $lists = \DB::table('web_scraps as wsc')
             ->leftjoin('templates as temp', 'wsc.template_id', '=', 'temp.id')
-            ->leftjoin('skus', 'skus.id', '=', 'temp.sku_id')
+            ->leftjoin('skus', 'skus.id', '=', 'wsc.sku_id')
             ->leftjoin('store_infos', 'temp.store_info_id', '=', 'store_infos.id')
             ->select(
                 'wsc.id', 'wsc.url', 'wsc.template_id', 'wsc.status',
@@ -184,7 +183,7 @@ class AdminController extends Controller
     public function importProductWebScrap($id) {
         $info = \DB::table('web_scraps as wsc')
             ->leftjoin('templates as temp', 'wsc.template_id', '=', 'temp.id')
-            ->leftjoin('skus', 'skus.id', '=', 'temp.sku_id')
+            ->leftjoin('skus', 'skus.id', '=', 'wsc.sku_id')
             ->leftjoin('store_infos', 'temp.store_info_id', '=', 'store_infos.id')
             ->select(
                 'wsc.id', 'wsc.url', 'wsc.template_id', 'wsc.status',
