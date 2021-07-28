@@ -49,8 +49,7 @@
                                                     <?php
                                                     $template_id = $item->id;
                                                     $shop = (array_key_exists($item->type_platform, $platforms)) ? $platforms[$item->type_platform].' : '.$item->store_name : '';
-                                                    $sku = ($item->sku_auto == 1) ? $item->sku.'++' : $item->sku;
-                                                    $template_name = $shop.' - '.$item->name.' - '.$item->product_name.' '.$sku;
+                                                    $template_name = $shop.' - '.$item->name.' - '.$item->product_name;
                                                     ?>
                                                     <option {{ ($ss_scrap && $template_id == $ss_scrap['template_id']) ? 'selected' : ''}}
                                                             value="{{ $template_id }}"> {{ $template_name }}
@@ -88,6 +87,28 @@
                                         <label>Loại ảnh</label>
                                         <input value="{{ ($ss_scrap) ? $ss_scrap['exclude_image'] : ''}}"
                                                type="text" class="form-control" name="exclude_image" placeholder="VD: link1, link2" >
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2">
+                                        <div class="form-group">
+                                            <label for="sku">SKU (cố định)</label>
+                                            <input value="{{ ($ss_scrap) ? $ss_scrap['sku'] : ''}}"
+                                                   type="text" id="sku" class="form-control" name="sku"
+                                                   placeholder="SKU fixed">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="sku_auto">Auto SKU</label>
+                                            <small class="text-info">
+                                                Nếu sản phẩm không có SKU cố định.
+                                                Hãy chọn trường này để hệ thống gen tự động mã SKU
+                                            </small>
+                                            <input value="{{ ($ss_scrap) ? $ss_scrap['sku_auto'] : ''}}"
+                                                   type="text" id="sku_auto" class="form-control" name="sku_auto"
+                                                   placeholder="Điền mã sku của sản phẩm">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">

@@ -94,11 +94,9 @@
         ];
 
         $templates = \DB::table('templates as temp')
-            ->leftjoin('skus','temp.sku_id', '=', 'skus.id')
             ->leftjoin('store_infos as info', 'temp.store_info_id', '=', 'info.id')
             ->select(
                 'temp.id','temp.name','temp.product_name','temp.type_platform',
-                'skus.sku', 'skus.is_auto as sku_auto',
                 'info.name as store_name'
             )
             ->orderBy('temp.type_platform')->get()->toArray();
@@ -114,7 +112,7 @@
                 "productLink": "a", // Dấu hiệu nhận biết thẻ Link của sản phẩm. Thường là "<a>", "<span>", "<div>"  
                 "https_origin": "https://vetz3d.com", // Để trống hoặc chỉ điền khi link sản phẩm thiếu phần đầu website
                 "btnNext": "button.ml-2", // Dấu hiệu nhận biết Nút bấm next trang (Để trống nếu kiểu là cuộn trang)
-                "signalParentButton": ".ShopPagination .d-inline-flex button", // Thuộc tính cha của nút bấm next trang (Để trống nếu kiểu là cuộn trang)
+                "signalLastButtonNoClass": ".ShopPagination .d-inline-flex button", // Thuộc tính của nút bấm cuối cùng (Để trống nếu kiểu là cuộn trang)
                 "signalAttribute": "class", //Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
                 "signalClassLastButton": "buttonDisabled", //Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
                 "url_end" : "https://vetz3d.com/shop?startId=60350adbbf2d6309e9d90385" // Last Page để kiểm tra nút bấm cuối cùng (Để trống nếu kiểu là cuộn trang)

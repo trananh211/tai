@@ -21,7 +21,8 @@ class WooApi extends Base
                 'version' => 'wc/v3',
                 'timeout' => 400,
                 'query_string_auth' => true,
-                'verify_ssl' => false
+                'verify_ssl' => false,
+                'query_string_auth' => true // Force Basic Authentication as query string true and using under HTTPS
             ]
         );
         return $woocommerce;
@@ -45,36 +46,19 @@ class WooApi extends Base
         $store_info_id = trim($rq['store_info_id']);
         $consumer_key = trim($rq['consumer_key']);
         $consumer_secret = trim($rq['consumer_secret']);
-        $sku = trim($rq['sku']);
-        $sku_auto = trim($rq['sku_auto']);
         $store_template_id = trim($rq['store_template_id']);
         if ($store_info_id == '' || $consumer_key == '' || $consumer_secret == '') {
             $message = 'Bạn phải chọn Store để tạo template';
-        } else if ($sku == '' && $sku_auto == '') {
-            $message = 'Bạn phải chọn 1 trong 2 trường SKU hoặc SKU AUTO';
         } else {
-            // kiểm tra tồn tại sku chưa
-            if ($rq['sku'] != null) {
-                $sku_auto = 0;
-                $string_sku = trim($rq['sku']);
+            // kiểm tra sự tồn tại của template hay chưa
+            $check_template_exist = \DB::table('templates')->select('id')
+                ->where('store_info_id', $store_info_id)
+                ->where('store_template_id', $store_template_id)
+                ->first();
+            if ($check_template_exist == NULL) {
+                $back = false;
             } else {
-                $sku_auto = 1;
-                $string_sku = trim($rq['sku_auto']);
-            }
-            $check_sku_exist = $this->checkExistSku($string_sku);
-            if ($check_sku_exist) {
-                $message = 'SKU : "' . $string_sku . '" đã tồn tại. Mời bạn chọn SKU khác';
-            } else {
-                // kiểm tra sự tồn tại của template hay chưa
-                $check_template_exist = \DB::table('templates')->select('id')
-                    ->where('store_info_id', $store_info_id)
-                    ->where('store_template_id', $store_template_id)
-                    ->first();
-                if ($check_template_exist == NULL) {
-                    $back = false;
-                } else {
-                    $message = 'Đã tồn tại template này trong hệ thống rồi.';
-                }
+                $message = 'Đã tồn tại template này trong hệ thống rồi.';
             }
         }
         if ($back) {
@@ -92,8 +76,6 @@ class WooApi extends Base
             if ($results) {
                 \DB::beginTransaction();
                 try {
-                    // lấy ra Sku ID
-                    $sku_id = $this->getSkuAutoId($string_sku, $sku_auto);
                     //Convert template to Array
                     $tmp = json_decode(json_encode($i, true), true);
                     $result_templates = $this->processTemplateData($tmp);
@@ -101,7 +83,6 @@ class WooApi extends Base
                         'name' => trim($rq['name']),
                         'product_name' => $tmp['name'],
                         'store_template_id' => trim($rq['store_template_id']),
-                        'sku_id' => $sku_id,
                         'type_platform' => env('STORE_WOO_ID'),
                         'store_info_id' => trim($rq['store_info_id']),
                         'woo_template_source' => json_encode($result_templates['woo_template_source']),
@@ -227,9 +208,11 @@ class WooApi extends Base
         logfile_system('==================== CREATE PRODUCT WOOCOMMERCE =====================');
         // kiểm tra website đang ở trạng thái process
         $web_scrap = \DB::table('web_scraps as wsc')
+            ->leftjoin('skus', 'wsc.sku_id', '=', 'skus.id')
             ->select(
                 'wsc.id as web_scrap_id', 'wsc.url as web_scrap_url', 'wsc.template_id', 'wsc.exclude_text',
-                'wsc.image_array', 'wsc.first_title', 'wsc.type_tag', 'wsc.tag_text', 'wsc.tag_position'
+                'wsc.image_array', 'wsc.first_title', 'wsc.type_tag', 'wsc.tag_text', 'wsc.tag_position',
+                'skus.sku', 'skus.is_auto'
             )
             ->where('wsc.status', env('STATUS_SCRAP_PRODUCT_PROCESS'))
             ->where('wsc.type_platform', env('STORE_WOO_ID'))
@@ -271,10 +254,8 @@ class WooApi extends Base
                     $template_id = $web_scrap->template_id;
                     $templates = \DB::table('templates as temp')
                         ->leftjoin('store_infos as info', 'temp.store_info_id', '=', 'info.id')
-                        ->leftjoin('skus', 'temp.sku_id', '=', 'skus.id')
                         ->leftjoin('store_categories', 'temp.store_category_id', '=', 'store_categories.id')
                         ->select(
-                            'skus.sku', 'skus.is_auto',
                             'store_categories.store_category_id', 'store_categories.name as store_category_name', 'store_categories.slug as store_category_slug',
                             'info.url', 'info.consumer_key', 'info.consumer_secret',
                             'temp.id as template_id', 'temp.woo_template_source'
@@ -527,10 +508,9 @@ class WooApi extends Base
                     try {
                         $prod_data = [];
                         // trả về sku
-                        $sku = ($templates->is_auto == 1) ? $templates->sku . (env('SKU_AUTO_BEGIN') + $product->count) : $templates->sku;
+                        $sku = ($web_scrap->is_auto == 1) ? $web_scrap->sku . (env('SKU_AUTO_BEGIN') + $product->count) : $web_scrap->sku;
                         $product_name = $this->getProductName($product->product_name, $sku, $web_scrap->exclude_text, $web_scrap->first_title);
 
-                        logfile_system('-- Đang tạo sản phẩm mới ' . $product_name);
                         // chuẩn bị dữ liệu data
                         $prod_data = $this->preProductData(json_decode($templates->woo_template_source, true));
                         // edit lại prod_data

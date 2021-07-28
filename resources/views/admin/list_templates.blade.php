@@ -28,9 +28,8 @@ $breadcrumb = [
                                 <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Name</th>
+                                    <th>Template Name</th>
                                     <th>Product Name</th>
-                                    <th>SKU</th>
                                     <th>Type</th>
                                     <th>Store</th>
                                     <th>Status</th>
@@ -44,7 +43,6 @@ $breadcrumb = [
                                             <td>{{ ++$key }}</td>
                                             <td>{{ $item->name }}</td>
                                             <td>{{ $item->product_name }}</td>
-                                            <td>{{ ($item->sku_auto == 1) ? $item->sku.'++' : $item->sku }}</td>
                                             <td>{!! getTypeStore($item->type_platform) !!}</td>
                                             <td>{{ $item->store_name}}</td>
                                             <td>{!! getStatus($item->status) !!}</td>
@@ -60,7 +58,7 @@ $breadcrumb = [
                                     @endforeach
                                 @else
                                     <tr >
-                                        <td colspan="8">Không có data . Cần được Tạo mới</td>
+                                        <td colspan="7">Không có data . Cần được Tạo mới</td>
                                     </tr>
                                 @endif
                                 </tbody>
