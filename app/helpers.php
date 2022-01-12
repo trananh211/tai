@@ -104,17 +104,17 @@
             {
                 "url": "https://vetz3d.com/shop?startId=6036571b4dd66d935ec5e512", // Địa chỉ website cần crawl
                 "waitSelector": "div.ShopPage", // Dấu hiệu nhận biết khi trang load xong ( Có thể có hoặc không )
-                "productItem": "div.ShopPage div.ProductItem", // Thuộc tính cha của product và có lặp lại với mỗi sản phẩm
+                "productItem": "div.ShopPage div.ProductItem", // Thuộc tính nhận dạng của list product và có lặp lại với mỗi sản phẩm (ul > li)
                 "productTitle": "div.BottomProduct > div.Title", // Dấu hiệu nhận biết title của sản phẩm
                 "imageSelector": "img.product_card__image",
                 "imageAttribute": "data-fallback",
                 "imageHttps": "https:",
                 "productLink": "a", // Dấu hiệu nhận biết thẻ Link của sản phẩm. Thường là "<a>", "<span>", "<div>"  
                 "https_origin": "https://vetz3d.com", // Để trống hoặc chỉ điền khi link sản phẩm thiếu phần đầu website
-                "btnNext": "button.ml-2", // Dấu hiệu nhận biết Nút bấm next trang (Để trống nếu kiểu là cuộn trang)
-                "signalLastButtonNoClass": ".ShopPagination .d-inline-flex button", // Thuộc tính của nút bấm cuối cùng (Để trống nếu kiểu là cuộn trang)
-                "signalAttribute": "class", //Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
-                "signalClassLastButton": "buttonDisabled", //Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
+                "btnNext": "button.ml-2", // (Nút Next trang) : Dấu hiệu nhận biết Nút bấm next trang (Để trống nếu kiểu là cuộn trang)
+                "signalLastButtonNoClass": ".ShopPagination .d-inline-flex button", // (Nút cuối cùng) : Thuộc tính của nút bấm cuối cùng (Để trống nếu kiểu là cuộn trang)
+                "signalAttribute": "class", //(Nút cuối cùng) : Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
+                "signalClassLastButton": "buttonDisabled", //(Nút cuối cùng) : Dấu hiệu nhận biết nút bấm cuối cùng có thuộc tính này (Để trống nếu kiểu là cuộn trang)
                 "url_end" : "https://vetz3d.com/shop?startId=60350adbbf2d6309e9d90385" // Last Page để kiểm tra nút bấm cuối cùng (Để trống nếu kiểu là cuộn trang)
             }
         ';

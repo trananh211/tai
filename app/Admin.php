@@ -203,7 +203,8 @@ class Admin extends Base
         unset($data['type_page_load']);
         unset($data['sku']);
         unset($data['sku_auto']);
-
+        //convert string skip to Ucwords
+        $data['exclude_text'] = ucwords(strtolower($data['exclude_text']));
         // lấy ra kiểu platform đang scrap
         $type = \DB::table('templates')->select('type_platform')->where('id',$data['template_id'])->first();
         $type_platform_id = ($type != null) ? $type->type_platform : 0;
