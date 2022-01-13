@@ -224,6 +224,7 @@ class WooApi extends Base
         $result = false;
         if ($web_scrap == null) {
             logfile_system('Đã hết website để tạo mới product. Chuyển sang công việc khác');
+            $result = true;
         } else {
             $web_scrap_id = $web_scrap->web_scrap_id;
             // kiểm tra xem product đã có đủ tag hết chưa.
