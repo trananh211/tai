@@ -99,8 +99,12 @@ class CustomCommand extends BaseCommand
 
     protected function run1Minute()
     {
+        $scraper_controller = new ScraperController();
         $woo_controller = new WooController();
         $check = $woo_controller->createProductWoo(); // tạo sản phẩm woo. Trả về false nếu đang tạo và true nếu không tạo
+        if ($check) {
+            $check = $scraper_controller->sendListProduct(); // lấy thông tin ảnh và title của sản phẩm
+        }
     }
 
     protected function run3Minute()
