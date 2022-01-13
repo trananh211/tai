@@ -23,7 +23,7 @@ class CustomCommand extends BaseCommand
      */
     protected $description = 'Command description';
 
-    protected $array_minute = [ 57, 7, 4, 1];
+    protected $array_minute = [ 57, 7, 3, 1];
 //    protected $array_minute = [1];
 
     /**
@@ -65,8 +65,8 @@ class CustomCommand extends BaseCommand
             case 1:
                 $this->run1Minute();
                 break;
-            case 4:
-                $this->run4Minute();
+            case 3:
+                $this->run3Minute();
                 break;
             case 7:
                 $this->run7Minute();
@@ -92,13 +92,18 @@ class CustomCommand extends BaseCommand
         $check0 = $this->test1();
     }
 
+    protected function run0Minute()
+    {
+
+    }
+
     protected function run1Minute()
     {
         $woo_controller = new WooController();
         $check = $woo_controller->createProductWoo(); // tạo sản phẩm woo. Trả về false nếu đang tạo và true nếu không tạo
     }
 
-    protected function run4Minute()
+    protected function run3Minute()
     {
         $scraper_controller = new ScraperController();
         $woo_controller = new WooController();
