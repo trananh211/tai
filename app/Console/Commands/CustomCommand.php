@@ -119,7 +119,8 @@ class CustomCommand extends BaseCommand
 
     protected function run7Minute()
     {
-
+        $woo_controller = new WooController();
+        $check = $woo_controller->createImageProductWoo(); // tạo sản phẩm woo. Trả về false nếu đang tạo và true nếu không tạo
     }
 
     protected function run19Minute()
