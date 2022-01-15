@@ -16,7 +16,6 @@ class WooController extends Controller
     public function createProductWoo() {
         $WooApi = new WooApi();
         $pre_create = $WooApi->preCreateProduct();
-        print_r($pre_create);
         // nếu pre create có data. tiếp tục check tag
         if ($pre_create['check_tag']) {
             $WooApi->processCreateTag($pre_create);
@@ -36,5 +35,11 @@ class WooController extends Controller
     public function createImageProductWoo() {
         $WooApi = new WooApi();
         return $WooApi->createImageProductWoo();
+    }
+
+    public function test()
+    {
+        $WooApi = new WooApi();
+        return $WooApi->test();
     }
 }

@@ -756,4 +756,16 @@ class WooApi extends Base
         ];
     }
     /* ================================= End create product ========================================*/
+
+    public function test()
+    {
+        $store_info_id = 5;
+        $stores = \DB::table('store_infos as info')
+            ->select('info.url', 'info.consumer_key', 'info.consumer_secret')
+            ->where('id', $store_info_id)
+            ->first();
+        // kết nối với woocomerce store và tạo tag
+        $woocommerce = $this->getConnectStore1($stores->url, $stores->consumer_key, $stores->consumer_secret);
+        print_r($woocommerce->get('payment_gateways'));
+    }
 }

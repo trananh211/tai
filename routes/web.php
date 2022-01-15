@@ -42,6 +42,13 @@ Route::group(['middleware' => ['member']], function () {
     Route::get('/delete-web-scrap/{id}', 'AdminController@deleteWebScrap');
     Route::get('/import-product-web-scrap/{id}', 'AdminController@importProductWebScrap');
     Route::post('/import-data-product', 'AdminController@saveDataByHandle');
+
+    // view add, remove paypal account
+    Route::get('list-paypal','PaypalController@listPaypal');
+    Route::get('add-new-paypal','PaypalController@getNewPaypal');
+    Route::post('post-new-paypal', 'PaypalController@addNewPaypalInfo');
+    Route::get('edit-paypal-info/{id}','PaypalController@getNewPaypal');
+    Route::post('edit-paypal', 'PaypalController@editPaypal');
 });
 
 
