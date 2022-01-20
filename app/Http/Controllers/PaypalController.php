@@ -57,7 +57,7 @@ class PaypalController extends BaseController
     // change paypal
     public function changePaypalInfo($store_info_id = null) {
         $paypalModel = new Paypal();
-        $paypalModel->addNewPaypal($store_info_id);
+        $paypalModel->changePaypalInfo($store_info_id);
     }
 
     /*
