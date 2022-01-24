@@ -1,8 +1,8 @@
 @extends('layouts.master')
 
 <?php
-$page_title = 'Add new a paypal';
-$page_link = url('add-new-paypal');
+$page_title = 'List paypal';
+$page_link = url('list-paypal');
 $breadcrumb = [
     'page_title' => $page_title,
     'page_link' => $page_link
@@ -97,6 +97,21 @@ if ($paypal != false) {
                                                 </select>
                                             </div>
                                         </div>
+                                        @if ($paypal != false)
+                                            <div class="col-2">
+                                                <!-- select -->
+                                                <div class="form-group">
+                                                    <label>Status</label>
+                                                    <select class="form-control" id="woo-store-select" name="status" required>
+                                                        @foreach ($status as $status_value => $status_info)
+                                                            <option
+                                                                {{ ($paypal != false && $status_value == $paypal->status) ? 'selected' : ''}}
+                                                                value="{{ $status_value }}">{{ $status_info }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 <!-- /.card-body -->

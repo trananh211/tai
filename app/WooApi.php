@@ -9,25 +9,6 @@ use \DB;
 
 class WooApi extends Base
 {
-    /*WooCommerce API*/
-    protected function getConnectStore($url, $consumer_key, $consumer_secret)
-    {
-        $woocommerce = new Client(
-            $url,
-            $consumer_key,
-            $consumer_secret,
-            [
-                'wp_api' => true,
-                'version' => 'wc/v3',
-                'timeout' => 400,
-                'query_string_auth' => true,
-                'verify_ssl' => false,
-                'query_string_auth' => true // Force Basic Authentication as query string true and using under HTTPS
-            ]
-        );
-        return $woocommerce;
-    }
-
     /*
      *  CREATE TEMPLATE
      * */
@@ -757,15 +738,186 @@ class WooApi extends Base
     }
     /* ================================= End create product ========================================*/
 
-    public function test()
+    /*
+     *  API new order, update order, update tracking info to paypal
+     * */
+    private function getWooSkuInfo()
     {
-        $store_info_id = 5;
-        $stores = \DB::table('store_infos as info')
-            ->select('info.url', 'info.consumer_key', 'info.consumer_secret')
-            ->where('id', $store_info_id)
-            ->first();
-        // kết nối với woocomerce store và tạo tag
-        $woocommerce = $this->getConnectStore1($stores->url, $stores->consumer_key, $stores->consumer_secret);
-        print_r($woocommerce->get('payment_gateways'));
+        return \DB::table('store_infos')->pluck('sku', 'id')->toArray();
     }
+
+    // lấy thông tin của paypal hiện tại
+    private function getPaypalInfo($woo_id)
+    {
+        $check_paypal = \DB::table('paypals')
+            ->select('id','profit_limit','profit_value')->where('store_info_id', $woo_id)
+            ->where('status', env('STATUS_PAYPAL_ACTIVE'))->first();
+        return $check_paypal;
+    }
+
+    private function changePaypalInfo($paypal_id, $store_info_id)
+    {
+        logfile_system('Đang thực hiện thay đổi paypay id: ' . $paypal_id . ' của store : ' . $store_info_id);
+        \DB::beginTransaction();
+        try {
+            // lấy ra paypal đang đủ điều kiện
+            $other_paypal = \DB::table('paypals')
+                ->select('id', 'api_email', 'api_pass', 'api_merchant_id', 'api_signature', 'api_client_id', 'api_secret')
+                ->where('store_info_id', $store_info_id)
+                ->where('status', env('STATUS_PAYPAL_READY'))
+                ->where('id', '<>', $paypal_id)
+                ->orderby('id', 'ASC')
+                ->first();
+            // nếu toàn bộ paypal account đã được luân phiên sử dụng. chúng ta sẽ reset lại toàn bộ account và thực hiện lại ở order sau
+            if ($other_paypal == NULL) {
+                \DB::table('paypals')
+                    ->where('store_info_id', $store_info_id)
+                    ->whereNotIn('status', array(env('STATUS_PAYPAL_NEW'), env('STATUS_PAYPAL_LIMITED')))
+                    ->where('id', '<>', $paypal_id)
+                    ->update([
+                        'status' => env('STATUS_PAYPAL_READY'),
+                        'profit_value' => 0,
+                        'updated_at' => dbTime()
+                    ]);
+            } else { // nếu có paypal thoả mãn yêu cầu. thực hiện change cổng thanh toán
+                $stores = \DB::table('store_infos as info')
+                    ->select('info.url', 'info.consumer_key', 'info.consumer_secret')
+                    ->where('id', $store_info_id)
+                    ->first();
+                // kết nối với woocomerce store
+                $woocommerce = $this->getConnectStore($stores->url, $stores->consumer_key, $stores->consumer_secret);
+                // chuẩn bị data thay đổi
+                $data = [
+                    'settings' => [
+                        env('PAYPAL_TYPE').'_username' => $other_paypal->api_email,
+                        env('PAYPAL_TYPE').'_password' => $other_paypal->api_pass,
+                        env('PAYPAL_TYPE').'_signature' => $other_paypal->api_signature,
+                        env('PAYPAL_TYPE').'_client_id' => $other_paypal->api_client_id,
+                        env('PAYPAL_TYPE').'_client_secret' => $other_paypal->api_secret
+                    ]
+                ];
+                // thực hiện thay đổi payment gateways
+                $r = $woocommerce->put('payment_gateways/' . env('PAYPAL_GATEWAVE'), $data);
+                if ($r) {
+                    // chuyển paypal cũ về trạng thái đã sử dụng xong
+                    \DB::table('paypals')->where('id', $paypal_id)->update(['status' => env('STATUS_PAYPAL_DONE')]);
+                    // chuyển paypal mới về trạng thái đang sử dụng
+                    \DB::table('paypals')->where('id', $other_paypal->id)->update(['status' => env('STATUS_PAYPAL_ACTIVE')]);
+                    logfile_system('Chuyển paypal id từ ' . $paypal_id . ' sang ' . $other_paypal->id . ' thành công');
+                }
+            }
+            \DB::commit(); // if there was no errors, your query will be executed
+        } catch (\Exception $e) {
+            $return = false;
+            $save = "[Error] Save to database error.";
+            \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+        }
+    }
+
+    /*Create new order*/
+    public function createOrder($data, $woo_id)
+    {
+        $db = array();
+        logfile_system('=====================CREATE NEW ORDER=======================');
+//        echo "<pre>";
+//        $lst_product_skip = $this->getProductSkip();
+        if (sizeof($data['line_items']) > 0) {
+            logfile_system('Store ' . $woo_id . ' has new ' . sizeof($data['line_items']) . ' order item.');
+            $woo_infos = $this->getWooSkuInfo();
+            $paypal_id = 0;
+            $paypal_profit_limit = 1;
+            $paypal_profit_value = 1;
+            $paypal_info = $this->getPaypalInfo($woo_id);
+            if ($paypal_info != null) {
+                $paypal_id = $paypal_info->id;
+                $paypal_profit_limit = $paypal_info->profit_limit;
+                $paypal_profit_value = $paypal_info->profit_value;
+            }
+            $lst_product = array();
+            $tmp_orders = array();
+            $change_pp = false;
+            foreach ($data['line_items'] as $key => $value) {
+                if (!in_array($data['number'], $tmp_orders))
+                {
+                    $shipping_cost = $data['shipping_total'];
+                    $tmp_orders[] = $data['number'];
+                } else {
+                    $shipping_cost = 0;
+                }
+                $str = "";
+                $variation_detail = '';
+                $variation_full_detail = '';
+                /*if (in_array($data['status'], array('failed', 'cancelled'))) {
+                    continue;
+                }*/
+                if (strpos(($value['name']), "-") !== false) {
+                    $value['name'] = trim(explode("-", $value['name'])[0]);
+                }
+                $db[] = [
+                    'store_info_id' => $woo_id,
+                    'order_id' => $data['id'],
+                    'number' => $data['number'],
+                    'order_status' => $data['status'],
+                    'product_id' => $value['product_id'],
+                    'product_name' => $value['name'],
+                    'quantity' => $value['quantity'],
+                    'payment_method' => trim($data['payment_method_title']),
+                    'paypal_id' => (trim(strtolower($data['payment_method_title'])) == 'paypal') ? $paypal_id : 0,
+                    'customer_note' => trim(htmlentities($data['customer_note'])),
+                    'transaction_id' => $data['transaction_id'],
+                    'price' => $value['price'],
+                    'shipping_cost' => $shipping_cost,
+                    'email' => $data['billing']['email'],
+                    'last_name' => trim($data['shipping']['last_name']),
+                    'first_name' => trim($data['shipping']['first_name']),
+                    'fullname' => $data['shipping']['first_name'] . ' ' . $data['shipping']['last_name'],
+                    'address' => (strlen($data['shipping']['address_2']) > 0) ? $data['shipping']['address_1'] . ', ' . $data['shipping']['address_2'] : $data['shipping']['address_1'],
+                    'city' => $data['shipping']['city'],
+                    'postcode' => $data['shipping']['postcode'],
+                    'country' => $data['shipping']['country'],
+                    'state' => $data['shipping']['state'],
+                    'phone' => $data['billing']['phone'],
+                    'created_at' => dbTime(),
+                    'updated_at' => dbTime()
+                ];
+                $lst_product[] = $value['product_id'];
+                $price_total = $value['price'] + $shipping_cost;
+                $paypal_profit_value += $price_total;
+                if ($paypal_profit_value >= $paypal_profit_limit) {
+                    $change_pp = true;
+                }
+            }
+        }
+        // nếu số tiền lớn hơn giới hạn. thực hiện change pp
+        if ($change_pp) {
+            $this->changePaypalInfo($paypal_id, $woo_id);
+        }
+        if (sizeof($db) > 0) {
+//            \DB::beginTransaction();
+//            try {
+//                // cập nhật paypal value vào paypal hiện tại
+                \DB::table('paypals')->where('id',$paypal_id)->update(['profit_value' => $paypal_profit_value]);
+                // tạo mới new order
+                \DB::table('woo_orders')->insert($db);
+//                $return = true;
+//                $save = "Tạo mới order. Save to database successfully";
+//                \DB::commit(); // if there was no errors, your query will be executed
+//            } catch (\Exception $e) {
+//                $return = false;
+//                $save = "[Error] Tạo mới order. Save to database error.";
+//                \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+//            }
+//            logfile_system($save . "\n");
+        }
+//
+//        /*Create new product*/
+//        $this->syncProduct(array_unique($lst_product), $woo_id);
+//
+//        /*get designs SKU*/
+//        $this->getDesignNew();
+
+
+//        print_r($data);
+    }
+    /* End API new order, update order , update tracking info paypal*/
 }

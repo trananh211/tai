@@ -33,7 +33,8 @@ $breadcrumb = [
                                     <th>#</th>
                                     <th>Email</th>
                                     <th>Store</th>
-                                    <th>Profit</th>
+                                    <th>Profit Value</th>
+                                    <th>Profit Limit</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -45,12 +46,13 @@ $breadcrumb = [
                                             <td>{{ ++$key }}</td>
                                             <td>{{ $item->api_email }}</td>
                                             <td>{{ $item->store_name }}</td>
+                                            <td>{{ $item->profit_value }} $</td>
                                             <td>{{ $item->profit_limit }} $</td>
-                                            <td>{{ $item->status }}</td>
+                                            <td class="text-center">{!! getStatusPaypal($item->status) !!}</td>
                                             <td>
                                                 <a href="{{ url('edit-paypal-info'.'/'.$item->id) }}">
                                                         <span class="btn btn-info">Edit</span></a> |
-                                                <span class="btn btn-danger">Delete</span>
+                                                Delete
                                             </td>
                                         </tr>
                                     @endforeach

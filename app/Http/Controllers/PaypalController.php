@@ -14,7 +14,7 @@ class PaypalController extends BaseController
             ->leftjoin('store_infos', 'pp.store_info_id', '=', 'store_infos.id')
             ->select(
                 'pp.id', 'pp.api_email', 'pp.api_pass', 'pp.api_signature','pp.api_client_id','pp.api_secret',
-                'pp.status', 'pp.profit_limit',
+                'pp.status', 'pp.profit_limit', 'pp.profit_value',
                 'store_infos.id as store_info_id', 'store_infos.name as store_name'
             )
             ->get()->toArray();
@@ -23,11 +23,18 @@ class PaypalController extends BaseController
 
     //get form add new paypal
     public function getNewPaypal($id = null) {
+        $status = [
+            env('STATUS_PAYPAL_NEW') => 'New',
+            env('STATUS_PAYPAL_READY') => 'Ready',
+            env('STATUS_PAYPAL_ACTIVE') => 'Actived',
+            env('STATUS_PAYPAL_DONE') => 'Done',
+            env('STATUS_PAYPAL_LIMITED') => 'Limited Paypal'
+        ];
         if (isset($id)) {
             $paypal = \DB::table('paypals as pp')
                 ->select(
                     'pp.id', 'pp.api_email', 'pp.api_pass', 'pp.api_signature','pp.api_client_id','pp.api_secret',
-                    'pp.status', 'pp.profit_limit', 'pp.api_merchant_id', 'pp.store_info_id'
+                    'pp.status', 'pp.profit_limit', 'pp.profit_value', 'pp.api_merchant_id', 'pp.store_info_id'
                 )
                 ->where('id', $id)
                 ->first();
@@ -35,7 +42,7 @@ class PaypalController extends BaseController
             $paypal = false;
         }
         $stores = \DB::table('store_infos')->select('id','name')->get()->toArray();
-        return view('admin.paypal.add_new_paypal', compact('stores','paypal'));
+        return view('admin.paypal.add_new_paypal', compact('stores','paypal', 'status'));
     }
 
     //add new paypal

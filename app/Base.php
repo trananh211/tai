@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Base extends Model
 {
     /*WooCommerce API*/
-    public function getConnectStore1($url, $consumer_key, $consumer_secret)
+    public function getConnectStore($url, $consumer_key, $consumer_secret)
     {
         $woocommerce = new Client(
             $url,
