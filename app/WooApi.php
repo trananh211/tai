@@ -819,8 +819,6 @@ class WooApi extends Base
     {
         $db = array();
         logfile_system('=====================CREATE NEW ORDER=======================');
-//        echo "<pre>";
-//        $lst_product_skip = $this->getProductSkip();
         if (sizeof($data['line_items']) > 0) {
             logfile_system('Store ' . $woo_id . ' has new ' . sizeof($data['line_items']) . ' order item.');
             $woo_infos = $this->getWooSkuInfo();
@@ -844,9 +842,6 @@ class WooApi extends Base
                 } else {
                     $shipping_cost = 0;
                 }
-                $str = "";
-                $variation_detail = '';
-                $variation_full_detail = '';
                 /*if (in_array($data['status'], array('failed', 'cancelled'))) {
                     continue;
                 }*/
@@ -893,31 +888,20 @@ class WooApi extends Base
             $this->changePaypalInfo($paypal_id, $woo_id);
         }
         if (sizeof($db) > 0) {
-//            \DB::beginTransaction();
-//            try {
-//                // cập nhật paypal value vào paypal hiện tại
+            \DB::beginTransaction();
+            try {
+                // cập nhật paypal value vào paypal hiện tại
                 \DB::table('paypals')->where('id',$paypal_id)->update(['profit_value' => $paypal_profit_value]);
                 // tạo mới new order
                 \DB::table('woo_orders')->insert($db);
-//                $return = true;
-//                $save = "Tạo mới order. Save to database successfully";
-//                \DB::commit(); // if there was no errors, your query will be executed
-//            } catch (\Exception $e) {
-//                $return = false;
-//                $save = "[Error] Tạo mới order. Save to database error.";
-//                \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
-//            }
-//            logfile_system($save . "\n");
+                $save = "Tạo mới order. Save to database successfully";
+                \DB::commit(); // if there was no errors, your query will be executed
+            } catch (\Exception $e) {
+                $save = "[Error] Tạo mới order. Save to database error.";
+                \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+            }
+            logfile_system($save . "\n");
         }
-//
-//        /*Create new product*/
-//        $this->syncProduct(array_unique($lst_product), $woo_id);
-//
-//        /*get designs SKU*/
-//        $this->getDesignNew();
-
-
-//        print_r($data);
     }
     /* End API new order, update order , update tracking info paypal*/
 }
