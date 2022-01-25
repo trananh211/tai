@@ -44,9 +44,9 @@ if ($paypal != false) {
                                     @endif
                                     <div class="row">
                                         <div class="col-5">
-                                            <label for="api_email">Email</label>
+                                            <label for="api_email">Username</label>
                                             <input required value="{{ ($paypal != false) ? $paypal->api_email : '' }}"
-                                                   type="email" id="api_email" class="form-control" name="api_email">
+                                                   type="text" id="api_email" class="form-control" name="api_email">
                                         </div>
                                         <div class="col-4">
                                             <label for="api_pass">Pass</label>
