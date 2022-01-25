@@ -57,17 +57,4 @@ class PaypalController extends BaseController
         return $paypalModel->editPaypal($request);
     }
 
-    /*
-     *  Paypal API
-     * */
-
-    // change paypal
-    public function changePaypalInfo($store_info_id = null) {
-        $paypalModel = new Paypal();
-        $paypalModel->changePaypalInfo($store_info_id);
-    }
-
-    /*
-     *  End Paypal API
-     * */
 }

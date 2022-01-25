@@ -818,6 +818,7 @@ class WooApi extends Base
     public function createOrder($data, $woo_id)
     {
         $db = array();
+        $str = '';
         logfile_system('=====================CREATE NEW ORDER=======================');
         if (sizeof($data['line_items']) > 0) {
             logfile_system('Store ' . $woo_id . ' has new ' . sizeof($data['line_items']) . ' order item.');
@@ -842,9 +843,9 @@ class WooApi extends Base
                 } else {
                     $shipping_cost = 0;
                 }
-                /*if (in_array($data['status'], array('failed', 'cancelled'))) {
+                if (in_array($data['status'], array('failed', 'cancelled'))) {
                     continue;
-                }*/
+                }
                 if (strpos(($value['name']), "-") !== false) {
                     $value['name'] = trim(explode("-", $value['name'])[0]);
                 }
@@ -894,14 +895,16 @@ class WooApi extends Base
                 \DB::table('paypals')->where('id',$paypal_id)->update(['profit_value' => $paypal_profit_value]);
                 // tạo mới new order
                 \DB::table('woo_orders')->insert($db);
-                $save = "Tạo mới order. Save to database successfully";
+                $str = "Tạo mới order. Save to database successfully";
                 \DB::commit(); // if there was no errors, your query will be executed
             } catch (\Exception $e) {
-                $save = "[Error] Tạo mới order. Save to database error.";
+                $str = "[Error] Tạo mới order. Save to database error.";
                 \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
             }
-            logfile_system($save . "\n");
+        } else {
+            $str = 'Không phải là đơn hàng thanh toán thành công. Bỏ qua';
         }
+        logfile_system($str . "\n");
     }
     /* End API new order, update order , update tracking info paypal*/
 }
