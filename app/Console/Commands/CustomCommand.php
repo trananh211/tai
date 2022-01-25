@@ -24,8 +24,8 @@ class CustomCommand extends BaseCommand
      */
     protected $description = 'Command description';
 
-//    protected $array_minute = [ 57, 7, 3, 1];
-    protected $array_minute = [1];
+    protected $array_minute = [ 57, 7, 3, 1];
+//    protected $array_minute = [1];
 
     /**
      * Create a new command instance.
@@ -64,8 +64,8 @@ class CustomCommand extends BaseCommand
     {
         switch ($minute) {
             case 1:
-                $this->run1MinuteTest();
-//                $this->run1Minute();
+//                $this->run1MinuteTest();
+                $this->run1Minute();
                 break;
             case 3:
                 $this->run3Minute();
@@ -93,9 +93,6 @@ class CustomCommand extends BaseCommand
     {
 //        $woo_controller = new WooController();
 //        $woo_controller->test();
-//
-        $paypal_controller = new PaypalController();
-        $check0 = $paypal_controller->changePaypalInfo();
         echo 'aa';
     }
 
