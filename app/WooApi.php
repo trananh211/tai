@@ -836,15 +836,15 @@ class WooApi extends Base
             $tmp_orders = array();
             $change_pp = false;
             foreach ($data['line_items'] as $key => $value) {
+                if (in_array($data['status'], array('failed', 'cancelled', 'pending'))) {
+                    continue;
+                }
                 if (!in_array($data['number'], $tmp_orders))
                 {
                     $shipping_cost = $data['shipping_total'];
                     $tmp_orders[] = $data['number'];
                 } else {
                     $shipping_cost = 0;
-                }
-                if (in_array($data['status'], array('failed', 'cancelled'))) {
-                    continue;
                 }
                 if (strpos(($value['name']), "-") !== false) {
                     $value['name'] = trim(explode("-", $value['name'])[0]);
