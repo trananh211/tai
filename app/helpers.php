@@ -215,7 +215,6 @@
         return $result;
     }
 
-
     function verifyDataScrap($data)
     {
         $url = env('URL_SERVER_POST_DATA_SCRAP');
@@ -230,5 +229,36 @@
         return $result;
     }
     /* END API SCRAP DATA*/
+
+    /* PAYPAL */
+    function getStatusPaypal($status) {
+        $class = '';
+        $text = '';
+        switch ($status) {
+            case env('STATUS_PAYPAL_NEW') :
+                $class = 'btn-default';
+                $text = 'New';
+                break;
+            case env('STATUS_PAYPAL_READY') :
+                $class = 'btn-primary';
+                $text = 'Ready';
+                break;
+            case env('STATUS_PAYPAL_ACTIVE') :
+                $class = 'btn-success';
+                $text = 'Actived';
+                break;
+            case env('STATUS_PAYPAL_DONE') :
+                $class = 'btn-secondary';
+                $text = 'Done';
+                break;
+            case env('STATUS_PAYPAL_LIMITED') :
+                $class = 'btn-danger';
+                $text = 'Limited Paypal';
+                break;
+        }
+        $str = '<div class="btn-sm center ' . $class . '">' . $text . '</div>';
+        return $str;
+    }
+    /* END PAYPAL */
 
 
