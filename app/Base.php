@@ -2,10 +2,30 @@
 
 namespace App;
 
+use Automattic\WooCommerce\Client;
 use Illuminate\Database\Eloquent\Model;
 
 class Base extends Model
 {
+    /*WooCommerce API*/
+    public function getConnectStore($url, $consumer_key, $consumer_secret)
+    {
+        $woocommerce = new Client(
+            $url,
+            $consumer_key,
+            $consumer_secret,
+            [
+                'wp_api' => true,
+                'version' => 'wc/v3',
+                'timeout' => 400,
+                'query_string_auth' => true,
+                'verify_ssl' => false,
+                'query_string_auth' => true // Force Basic Authentication as query string true and using under HTTPS
+            ]
+        );
+        return $woocommerce;
+    }
+
     /*
      * Hàm kiểm tra tồn tại sku chưa. Nếu chưa trả về false, tồn tại trả về true
     */

@@ -94,6 +94,12 @@
                                 <p>Shop Base</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ url('list-paypal') }}" class="nav-link">
+                                <i class="nav-icon fas fa-list-ol"></i>
+                                <p>List Paypal</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
