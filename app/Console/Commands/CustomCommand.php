@@ -24,8 +24,8 @@ class CustomCommand extends BaseCommand
      */
     protected $description = 'Command description';
 
-    protected $array_minute = [ 57, 7, 3, 1];
-//    protected $array_minute = [1];
+//    protected $array_minute = [ 57, 7, 3, 1];
+    protected $array_minute = [1];
 
     /**
      * Create a new command instance.
@@ -64,8 +64,8 @@ class CustomCommand extends BaseCommand
     {
         switch ($minute) {
             case 1:
-//                $this->run1MinuteTest();
-                $this->run1Minute();
+                $this->run1MinuteTest();
+//                $this->run1Minute();
                 break;
             case 3:
                 $this->run3Minute();
@@ -87,13 +87,6 @@ class CustomCommand extends BaseCommand
                 echo 'khong run duoc vao thoi gian nay '. $minute;
                 break;
         }
-    }
-
-    protected function run1MinuteTest()
-    {
-//        $woo_controller = new WooController();
-//        $woo_controller->test();
-        echo 'aa';
     }
 
     protected function run0Minute()
@@ -138,7 +131,7 @@ class CustomCommand extends BaseCommand
         $check = $scraper_controller->getWebScrap(); // bắt đầu cào từ web để lấy product list
     }
 
-    private function test1()
+    private function run1MinuteTest()
     {
         echo "<pre>\n";
         $scraper_controller = new ScraperController();
@@ -146,7 +139,12 @@ class CustomCommand extends BaseCommand
 //        $check = $scraper_controller->getWebScrap(); // bắt đầu cào từ web để lấy product list
 //        $check = $scraper_controller->sendListProduct(); // lấy thông tin ảnh và title của sản phẩm
 //        $check = $woo_controller->createProductWoo(); // tạo sản phẩm woo. Trả về false nếu đang tạo và true nếu không tạo
-        $check = $woo_controller->createImageProductWoo(); // tạo sản phẩm woo. Trả về false nếu đang tạo và true nếu không tạo
+//        $check = $woo_controller->createImageProductWoo(); // tạo sản phẩm woo. Trả về false nếu đang tạo và true nếu không tạo
+
+        $paypal_controller = new PaypalController();
+        $check = $paypal_controller->testPaymentGateWay();
+//        echo 'aa';
+
         var_dump($check);
     }
 }

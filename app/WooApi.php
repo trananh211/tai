@@ -796,6 +796,8 @@ class WooApi extends Base
                         env('PAYPAL_TYPE').'_client_secret' => $other_paypal->api_secret
                     ]
                 ];
+                $r1 = $woocommerce->get('payment_gateways');
+                print_r($r1);
                 // thực hiện thay đổi payment gateways
                 $r = $woocommerce->put('payment_gateways/' . env('PAYPAL_GATEWAVE'), $data);
                 if ($r) {

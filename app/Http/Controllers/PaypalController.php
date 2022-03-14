@@ -33,7 +33,7 @@ class PaypalController extends BaseController
         if (isset($id)) {
             $paypal = \DB::table('paypals as pp')
                 ->select(
-                    'pp.id', 'pp.api_email', 'pp.api_pass', 'pp.api_signature','pp.api_client_id','pp.api_secret',
+                    'pp.id', 'pp.api_email', 'pp.api_username', 'pp.api_pass', 'pp.api_signature','pp.api_client_id','pp.api_secret',
                     'pp.status', 'pp.profit_limit', 'pp.profit_value', 'pp.api_merchant_id', 'pp.store_info_id'
                 )
                 ->where('id', $id)
@@ -57,4 +57,8 @@ class PaypalController extends BaseController
         return $paypalModel->editPaypal($request);
     }
 
+    public function testPaymentGateWay() {
+        $paypalModel = new Paypal();
+        return $paypalModel->testPaymentGateWay();
+    }
 }
