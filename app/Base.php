@@ -32,8 +32,10 @@ class Base extends Model
     public function checkExistSku($string = null) {
         $sku_string = strtoupper($string);
         $check_exists = \DB::table("skus")->select('id')->where('sku',$sku_string)->first();
-        return  ($check_exists == null) ? false : true;
+//        return  ($check_exists == null) ? false : true;
+        return false;
     }
+
 
     // Hàm trả về sku_id
     public function getSkuAutoId($string = null, $is_auto = 0)
