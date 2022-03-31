@@ -24,8 +24,8 @@ class CustomCommand extends BaseCommand
      */
     protected $description = 'Command description';
 
-//    protected $array_minute = [ 57, 7, 3, 1];
-    protected $array_minute = [1];
+    protected $array_minute = [ 57, 7, 3, 1];
+//    protected $array_minute = [1];
 
     /**
      * Create a new command instance.
