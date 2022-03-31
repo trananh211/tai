@@ -57,7 +57,7 @@ class Base extends Model
     // Hàm trả về product name với đúng điều kiện sku
     public function getProductName($name, $sku, $exclude_text, $first_title)
     {
-        $name = str_replace($exclude_text, "",  $name);
+        $name = str_replace($exclude_text, "",  ucwords($name));
         $product_name = ucwords(trim($first_title.' '.$name));
         $product_name .= ' '.$sku;
         return $product_name;
