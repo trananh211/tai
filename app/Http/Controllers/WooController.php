@@ -42,4 +42,10 @@ class WooController extends Controller
         $WooApi = new WooApi();
         return $WooApi->test();
     }
+
+    public function changeInfoProduct()
+    {
+        $WooApi = new WooApi();
+        return $WooApi->changeInfoProduct();
+    }
 }

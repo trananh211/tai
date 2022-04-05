@@ -53,7 +53,8 @@ class AdminController extends Controller
         $templates = \DB::table('templates as t')
             ->leftjoin('store_infos as s','s.id', '=', 't.store_info_id')
             ->select(
-                't.id', 't.name','t.product_name', 't.type_platform','t.status',
+                't.id', 't.name','t.product_name', 't.type_platform','t.status','t.origin_price', 't.sale_price',
+                't.t_status',
                 's.name as store_name'
             )
             ->orderBy('id','DESC')
@@ -151,7 +152,8 @@ class AdminController extends Controller
             ->leftjoin('skus', 'skus.id', '=', 'wsc.sku_id')
             ->leftjoin('store_infos', 'temp.store_info_id', '=', 'store_infos.id')
             ->select(
-                'wsc.id', 'wsc.url', 'wsc.template_id', 'wsc.status',
+                'wsc.id', 'wsc.url', 'wsc.template_id', 'wsc.status', 'wsc.exclude_text', 'wsc.image_array',
+                'wsc.exclude_image', 'wsc.t_status', 'wsc.product_name_change', 'wsc.product_name_exclude',
                 'temp.name as template_name', 'temp.type_platform',
                 'skus.sku', 'skus.is_auto as sku_auto',
                 'store_infos.name as store_name'
@@ -194,5 +196,17 @@ class AdminController extends Controller
             ->where('wsc.id', $id)
             ->first();
         return view('user.import_product_by_handle', compact('info','id'));
+    }
+
+    //edit product info
+    public function editProductInfo(Request $request){
+        $adminModel = new Admin();
+        return $adminModel->editProductInfo($request);
+    }
+
+    //edit template info
+    public function editTemplatesInfo(Request $request){
+        $adminModel = new Admin();
+        return $adminModel->editTemplatesInfo($request);
     }
 }

@@ -25,13 +25,6 @@
                      with font-awesome or any other icon font library -->
                 <li class="nav-header">Crawler Website</li>
                 <li class="nav-item">
-                    <a href=" {{ url('list-scraper') }}" class="nav-link">
-                        <i class="nav-icon fas fa-list-ol"></i>
-                        <p> List Scraper </p>
-                    </a>
-
-                </li>
-                <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-hand-holding-water"></i>
                         <p>
@@ -40,16 +33,23 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+
                         <li class="nav-item">
-                            <a href=" {{ url('view-scraper') }}" class="nav-link">
-                                <i class="nav-icon fas fa-wrench"></i>
-                                <p>Scraper Setup </p>
+                            <a href=" {{ url('list-scraper') }}" class="nav-link">
+                                <i class="nav-icon fas fa-list-ol"></i>
+                                <p>List Scraper</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="{{ url('list-templates') }}" class="nav-link">
                                 <i class="nav-icon fas fa-list-ol"></i>
                                 <p>List Template</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href=" {{ url('view-scraper') }}" class="nav-link">
+                                <i class="nav-icon fas fa-wrench"></i>
+                                <p>Scraper Setup </p>
                             </a>
                         </li>
                         <li class="nav-item">
