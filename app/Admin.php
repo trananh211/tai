@@ -375,12 +375,13 @@ class Admin extends Base
 
             $sku_id = $this->getSkuAutoId($string_sku, $sku_auto);
             $data['sku_id'] = $sku_id;
-
-            $r = array_diff($data, $check_data);
-
+            $r = array_diff_assoc($data, $check_data);
             if (sizeof($r) > 0) {
-                $data['t_status'] = env('T_STATUS_CHANGE_INFO_RUNNING');
+                $data['t_status'] = env('T_STATUS_CHANGE_INFO_READY');
                 \DB::table('web_scraps')->where('id', $web_scrap_id)->update($data);
+                \DB::table('list_products')
+                    ->where('web_scrap_id',$web_scrap_id)
+                    ->update(['t_status' => env('T_STATUS_CHANGE_INFO_READY')]);
                 $result = true;
                 $message = 'Cập nhật thành công website scrap';
             } else {
@@ -415,11 +416,20 @@ class Admin extends Base
             unset($data['_token']);
             unset($data['id']);
 
-            $r = array_diff($data, $check_data);
+            $r = array_diff_assoc($data, $check_data);
 
             if (sizeof($r) > 0) {
-                $data['t_status'] = env('T_STATUS_CHANGE_INFO_RUNNING');
+//                $data['t_status'] = env('T_STATUS_CHANGE_INFO_READY');
+                $list_web_scrap_ids = \DB::table('web_scraps')->where('template_id',$template_id)->pluck('id')->toArray();
                 \DB::table('templates')->where('id', $template_id)->update($data);
+                \DB::table('web_scraps')
+                    ->where('template_id',$template_id)
+                    ->update(['t_status' => env('T_STATUS_CHANGE_INFO_READY')]);
+                if (sizeof($list_web_scrap_ids) > 0) {
+                    \DB::table('list_products')
+                        ->whereIn('web_scrap_id',$list_web_scrap_ids)
+                        ->update(['t_status' => env('T_STATUS_CHANGE_INFO_READY')]);
+                }
                 $result = true;
                 $message = 'Cập nhật thành công temlates';
             } else {

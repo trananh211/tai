@@ -183,8 +183,8 @@ function getTStatus($status)
     $view = '';
     switch ($status) {
         case env('T_STATUS_CHANGE_INFO_NEW'):
-            $class = 'bg-primary';
-            $view = "New";
+            $class = 'bg-secondary';
+            $view = "Normal";
             break;
         case env('T_STATUS_CHANGE_INFO_READY'):
             $class = 'bg-info';
@@ -192,11 +192,11 @@ function getTStatus($status)
             break;
         case env('T_STATUS_CHANGE_INFO_RUNNING'):
             $class = 'bg-orange';
-            $view = "Running";
+            $view = "Changing";
             break;
-        case env('T_STATUS_CHANGE_INFO_FINISH'):
-            $class = 'bg-success';
-            $view = "Ready";
+        case env('T_STATUS_CHANGE_INFO_ERROR'):
+            $class = 'bg-error';
+            $view = "Error";
             break;
     }
     echo '<div class="color-palette-set">

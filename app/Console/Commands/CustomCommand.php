@@ -24,8 +24,8 @@ class CustomCommand extends BaseCommand
      */
     protected $description = 'Command description';
 
-//    protected $array_minute = [ 57, 7, 3, 1];
-    protected $array_minute = [1];
+    protected $array_minute = [ 57, 7, 3, 1];
+//    protected $array_minute = [1];
 
     /**
      * Create a new command instance.
@@ -64,8 +64,8 @@ class CustomCommand extends BaseCommand
     {
         switch ($minute) {
             case 1:
-                $this->run1MinuteTest();
-//                $this->run1Minute();
+//                $this->run1MinuteTest();
+                $this->run1Minute();
                 break;
             case 3:
                 $this->run3Minute();
@@ -73,9 +73,9 @@ class CustomCommand extends BaseCommand
             case 7:
                 $this->run7Minute();
                 break;
-//            case 19:
-//                $this->run19Minute();
-//                break;
+            case 19:
+                $this->run19Minute();
+                break;
             case 57:
                 $this->run57Minute();
                 break;
@@ -111,6 +111,9 @@ class CustomCommand extends BaseCommand
         $check = $scraper_controller->sendListProduct(); // lấy thông tin ảnh và title của sản phẩm
         if ($check) {
             $check = $woo_controller->createImageProductWoo(); // tạo sản phẩm woo. Trả về false nếu đang tạo và true nếu không tạo
+            if ($check) {
+                $woo_controller->changeInfoProduct(); // thay đổi thông tin của product
+            }
         }
     }
 

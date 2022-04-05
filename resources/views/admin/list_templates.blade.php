@@ -45,7 +45,7 @@ $breadcrumb = [
                                             <td>{{ $item->product_name }}</td>
                                             <td>{!! getTypeStore($item->type_platform) !!}</td>
                                             <td>{{ $item->store_name}}</td>
-                                            <td>{!! getStatus($item->status) !!}</td>
+                                            <td>{!! getTStatus($item->t_status) !!}</td>
                                             <td>
                                                 <button type="button" class="btn btn-xs btn-block btn-warning"
                                                         data-toggle="modal" data-target="#modal-xl-{{ $item->id }}">Edit</button>
@@ -131,7 +131,7 @@ $breadcrumb = [
         </div>
     </section>
     <pre>
-        <?php print_r($templates); ?>
+        <?php //print_r($templates); ?>
     </pre>
 @endsection
 
