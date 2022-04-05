@@ -176,6 +176,34 @@
                 </div>';
     }
 
+// hiển thị ra trạng thái của website
+function getTStatus($status)
+{
+    $class = '';
+    $view = '';
+    switch ($status) {
+        case env('T_STATUS_CHANGE_INFO_NEW'):
+            $class = 'bg-primary';
+            $view = "New";
+            break;
+        case env('T_STATUS_CHANGE_INFO_READY'):
+            $class = 'bg-info';
+            $view = "Ready";
+            break;
+        case env('T_STATUS_CHANGE_INFO_RUNNING'):
+            $class = 'bg-orange';
+            $view = "Running";
+            break;
+        case env('T_STATUS_CHANGE_INFO_FINISH'):
+            $class = 'bg-success';
+            $view = "Ready";
+            break;
+    }
+    echo '<div class="color-palette-set">
+                  <div class="'.$class.' text-center color-palette"><span>'.$view.'</span></div>
+                </div>';
+}
+
     /* API SCRAP DATA*/
     function getHeader()
     {
@@ -260,5 +288,12 @@
         return $str;
     }
     /* END PAYPAL */
+
+    /* Sub string*/
+    function subString($str) {
+        $string = substr($str, 0, 20).'...';
+        echo "<span title='".$str."'>".$string."</span>...";
+    }
+    /* End sub string*/
 
 

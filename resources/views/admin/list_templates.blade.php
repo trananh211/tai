@@ -47,12 +47,71 @@ $breadcrumb = [
                                             <td>{{ $item->store_name}}</td>
                                             <td>{!! getStatus($item->status) !!}</td>
                                             <td>
-                                                Edit |
+                                                <button type="button" class="btn btn-xs btn-block btn-warning"
+                                                        data-toggle="modal" data-target="#modal-xl-{{ $item->id }}">Edit</button>
+
                                                 <a href="{{ url('delete-template/'.$item->id) }}"
                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa Template này?');"
                                                 >
                                                     <button type="button" class="btn btn-xs btn-block btn-danger">Delete</button>
                                                 </a>
+
+                                                {{-- Model--}}
+                                                <div class="modal fade" id="modal-xl-{{ $item->id }}">
+                                                    <div class="modal-dialog modal-xl">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h4 class="modal-title">{{ $item->name }} - {{ $item->store_name }}</h4>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="modal-body">
+                                                                <form action="{{url('edit-templates-info')}}" method="post">
+                                                                    {{ csrf_field() }}
+                                                                    <div class="card-body">
+                                                                        <div class="row">
+                                                                            <input type="text" class="form-control hidden" name="id" value="{{ $item->id }}" >
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-4">
+                                                                                <label for="name">Template Name Change</label>
+                                                                                <input value="{{ $item->name }}"
+                                                                                       type="text" id="name" class="form-control" name="name"
+                                                                                       placeholder="Nhập ký tự product mới ở đây" >
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-4">
+                                                                                <div class="form-group">
+                                                                                    <label for="sale_price">Giá khuyến mại (USD)</label>
+                                                                                    <input value="{{ ($item->sale_price) }}"
+                                                                                           type="text" id="sale_price" class="form-control" name="sale_price"
+                                                                                           placeholder="Điền giá khuyến mại của sản phẩm">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-4">
+                                                                                <div class="form-group">
+                                                                                    <label for="sale_price_auto">Giá gốc (USD)</label>
+                                                                                    <input value="{{ $item->origin_price }}"
+                                                                                           type="text" id="origin_price" class="form-control" name="origin_price"
+                                                                                           placeholder="Điền giá gốc của sản phẩm">
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- /.card-body -->
+                                                                    <button type="submit" class="btn btn-primary right">Save changes</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                        <!-- /.modal-content -->
+                                                    </div>
+                                                    <!-- /.modal-dialog -->
+                                                </div>
+                                                <!-- /.modal -->
+                                                {{-- End Model--}}
                                             </td>
                                         </tr>
                                     @endforeach
@@ -71,6 +130,9 @@ $breadcrumb = [
             </div>
         </div>
     </section>
+    <pre>
+        <?php print_r($templates); ?>
+    </pre>
 @endsection
 
 @section('script')

@@ -345,6 +345,95 @@ class Admin extends Base
             $message = 'List danh sách bị lỗi. kiểm tra lại';
         }
         return back()->with($alert, $message);
+    }
 
+    //edit product info
+    public function editProductInfo($request)
+    {
+        \DB::beginTransaction();
+        try {
+            $alert = 'success';
+            $data = $request->all();
+            $web_scrap_id = $data['id'];
+            $check_data = \DB::table('web_scraps')
+                ->select('sku_id', 'product_name_change', 'product_name_exclude', 'exclude_text', 'exclude_image')
+                ->where('id', $web_scrap_id)
+                ->first();
+            $check_data = (array)$check_data;
+            // kiểm tra tồn tại sku chưa
+            if ($data['sku'] != null) {
+                $sku_auto = 0;
+                $string_sku = trim($data['sku']);
+            } else {
+                $sku_auto = 1;
+                $string_sku = trim($data['sku_auto']);
+            }
+            unset($data['_token']);
+            unset($data['id']);
+            unset($data['sku']);
+            unset($data['sku_auto']);
+
+            $sku_id = $this->getSkuAutoId($string_sku, $sku_auto);
+            $data['sku_id'] = $sku_id;
+
+            $r = array_diff($data, $check_data);
+
+            if (sizeof($r) > 0) {
+                $data['t_status'] = env('T_STATUS_CHANGE_INFO_RUNNING');
+                \DB::table('web_scraps')->where('id', $web_scrap_id)->update($data);
+                $result = true;
+                $message = 'Cập nhật thành công website scrap';
+            } else {
+                $alert = 'warning';
+                $message = 'Không thay đổi trường nào nên không cập nhật lại database';
+            }
+
+            \DB::commit(); // if there was no errors, your query will be executed
+        } catch (\Exception $e) {
+            $alert = 'error';
+            $result = false;
+            $message = 'Không thể Cập nhật website scrap này. Xảy ra lỗi ngoài mong muốn: ' . $e->getMessage();
+            \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+        }
+        return back()->with($alert, $message);
+    }
+
+    //edit template info
+    public function editTemplatesInfo($request)
+    {
+        \DB::beginTransaction();
+        try {
+            $alert = 'success';
+            $data = $request->all();
+            $template_id = $data['id'];
+            $check_data = \DB::table('templates')
+                ->select('name', 'sale_price', 'origin_price')
+                ->where('id', $template_id)
+                ->first();
+            $check_data = (array)$check_data;
+
+            unset($data['_token']);
+            unset($data['id']);
+
+            $r = array_diff($data, $check_data);
+
+            if (sizeof($r) > 0) {
+                $data['t_status'] = env('T_STATUS_CHANGE_INFO_RUNNING');
+                \DB::table('templates')->where('id', $template_id)->update($data);
+                $result = true;
+                $message = 'Cập nhật thành công temlates';
+            } else {
+                $alert = 'warning';
+                $message = 'Không thay đổi trường nào nên không cập nhật lại database';
+            }
+
+            \DB::commit(); // if there was no errors, your query will be executed
+        } catch (\Exception $e) {
+            $alert = 'error';
+            $result = false;
+            $message = 'Không thể Cập nhật templates này. Xảy ra lỗi ngoài mong muốn: ' . $e->getMessage();
+            \DB::rollback(); // either it won't execute any statements and rollback your database to previous state
+        }
+        return back()->with($alert, $message);
     }
 }
